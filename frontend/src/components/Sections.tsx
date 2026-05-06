@@ -1,11 +1,10 @@
 import { Filter, ListFilter, Search } from "lucide-react";
-import type { Dispatch, SetStateAction } from "react";
 import type { NodeResource, PartitionSummary, QueueJob } from "../types";
-import { EmptyState, FilterSelect, ScopeControl, SectionTitle } from "./common";
-import { FleetGrid, NodeSummary, NodeTable } from "./Nodes";
+import { FilterSelect, ScopeControl, SectionTitle } from "./common";
+import { FleetMap } from "./FleetMap";
+import { NodeSummary } from "./Nodes";
+import { NodeTable } from "./NodeTable";
 import { QueuePressurePanel, QueueTable, UserWorkloadPanel } from "./Queue";
-
-const NODE_PREVIEW_LIMIT = 80;
 
 type NodeSummaryData = {
   states: [string, number][];
@@ -15,7 +14,6 @@ type NodeSummaryData = {
 
 export function NodesSection({
   filteredNodes,
-  displayedNodes,
   nodeSummary,
   partitions,
   gpuTypes,
@@ -24,15 +22,12 @@ export function NodesSection({
   nodeGpuFilter,
   nodeStateFilter,
   nodeQuery,
-  showAllNodes,
   setNodePartitionFilter,
   setNodeGpuFilter,
   setNodeStateFilter,
-  setNodeQuery,
-  setShowAllNodes
+  setNodeQuery
 }: {
   filteredNodes: NodeResource[];
-  displayedNodes: NodeResource[];
   nodeSummary: NodeSummaryData;
   partitions: PartitionSummary[];
   gpuTypes: string[];
@@ -41,30 +36,17 @@ export function NodesSection({
   nodeGpuFilter: string;
   nodeStateFilter: string;
   nodeQuery: string;
-  showAllNodes: boolean;
   setNodePartitionFilter: (value: string) => void;
   setNodeGpuFilter: (value: string) => void;
   setNodeStateFilter: (value: string) => void;
   setNodeQuery: (value: string) => void;
-  setShowAllNodes: Dispatch<SetStateAction<boolean>>;
 }) {
   return (
     <section id="nodes" className="panel">
       <div className="section-row">
         <SectionTitle icon={<ListFilter size={18} />} title="Node Explorer" />
         <div className="section-actions">
-          <span className="count-label">
-            {filteredNodes.length} matched, {displayedNodes.length} shown
-          </span>
-          {filteredNodes.length > NODE_PREVIEW_LIMIT ? (
-            <button
-              type="button"
-              className="text-button"
-              onClick={() => setShowAllNodes((current) => !current)}
-            >
-              {showAllNodes ? "Show first 80" : "Show all"}
-            </button>
-          ) : null}
+          <span className="count-label">{filteredNodes.length} matched</span>
         </div>
       </div>
       <div className="filters node-filters">
@@ -91,9 +73,9 @@ export function NodesSection({
           />
         </label>
       </div>
-      <FleetGrid nodes={filteredNodes} />
+      <FleetMap nodes={filteredNodes} />
       <NodeSummary summary={nodeSummary} />
-      <NodeTable nodes={displayedNodes} />
+      <NodeTable nodes={filteredNodes} />
     </section>
   );
 }
@@ -194,5 +176,3 @@ export function QueueSection({
     </section>
   );
 }
-
-export { NODE_PREVIEW_LIMIT };

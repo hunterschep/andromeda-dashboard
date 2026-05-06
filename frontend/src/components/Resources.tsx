@@ -48,6 +48,14 @@ export function PartitionMatrix({ partitions }: { partitions: PartitionSummary[]
   if (!partitions.length) return <EmptyState text="No partition matrix available." />;
   return (
     <div className="availability-matrix" aria-label="Partition availability matrix">
+      <div className="matrix-row matrix-head">
+        <strong>Partition</strong>
+        <span>Idle nodes</span>
+        <span>Idle CPU</span>
+        <span>Free GPU</span>
+        <span>Free memory</span>
+        <span>Max time</span>
+      </div>
       {partitions.map((partition) => (
         <div className="matrix-row" key={partition.name}>
           <strong className="mono">{partition.name}</strong>

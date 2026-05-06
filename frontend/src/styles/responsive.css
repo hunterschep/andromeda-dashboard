@@ -28,6 +28,11 @@
   .runtime-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .fleet-map,
+  .fleet-lane {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {

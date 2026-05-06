@@ -15,7 +15,7 @@ import { formatMemory, formatNumber } from "./api";
 import { Metric, SectionTitle, StatusLine } from "./components/common";
 import { HistoryBox, HistoryTable, JobList, JobRuntimePanel } from "./components/Jobs";
 import { GpuTable, PartitionMatrix, PartitionTable } from "./components/Resources";
-import { NODE_PREVIEW_LIMIT, NodesSection, QueueSection } from "./components/Sections";
+import { NodesSection, QueueSection } from "./components/Sections";
 import { Sidebar, Topbar } from "./components/Shell";
 import { AccountLimitsPanel, CacheTable, CommandList, InsightsList, SchedulerPanel } from "./components/Tools";
 import { useDashboardSnapshot } from "./hooks/useDashboardSnapshot";
@@ -39,7 +39,6 @@ export function App() {
   const [nodeGpuFilter, setNodeGpuFilter] = useState("all");
   const [nodeStateFilter, setNodeStateFilter] = useState("all");
   const [nodeQuery, setNodeQuery] = useState("");
-  const [showAllNodes, setShowAllNodes] = useState(false);
   const [refreshCadence, setRefreshCadence] = useState<"off" | "30" | "60">("off");
   const [copied, setCopied] = useState<string | null>(null);
   const { state, load } = useDashboardSnapshot(scope);
@@ -49,10 +48,6 @@ export function App() {
     const interval = window.setInterval(() => void load(scope, true), Number(refreshCadence) * 1000);
     return () => window.clearInterval(interval);
   }, [load, refreshCadence, scope]);
-
-  useEffect(() => {
-    setShowAllNodes(false);
-  }, [nodePartitionFilter, nodeGpuFilter, nodeStateFilter, nodeQuery]);
 
   const allCache = useMemo(() => {
     if (state.cache.length) return dedupeCache(state.cache);
@@ -93,7 +88,6 @@ export function App() {
     });
   }, [nodes, nodePartitionFilter, nodeGpuFilter, nodeStateFilter, nodeQuery]);
 
-  const displayedNodes = showAllNodes ? filteredNodes : filteredNodes.slice(0, NODE_PREVIEW_LIMIT);
   const nodeSummary = useMemo(() => summarizeNodes(filteredNodes), [filteredNodes]);
   const queuePressure = useMemo(() => summarizeQueuePressure(state.queue?.jobs ?? []), [state.queue]);
   const userWorkload = useMemo(() => summarizeUsers(state.queue?.jobs ?? []), [state.queue]);
@@ -136,7 +130,7 @@ export function App() {
           <Metric icon={<Cpu size={18} />} label="CPUs" value={formatNumber(cluster?.cpus_idle)} detail={`${formatNumber(cluster?.cpus_total)} total`} />
           <Metric icon={<HardDrive size={18} />} label="Memory" value={formatMemory(cluster?.memory_free_mb)} detail="free" />
         </section>
-        <NodesSection {...{ filteredNodes, displayedNodes, nodeSummary, partitions, gpuTypes, nodeStates, nodePartitionFilter, nodeGpuFilter, nodeStateFilter, nodeQuery, showAllNodes, setNodePartitionFilter, setNodeGpuFilter, setNodeStateFilter, setNodeQuery, setShowAllNodes }} />
+        <NodesSection {...{ filteredNodes, nodeSummary, partitions, gpuTypes, nodeStates, nodePartitionFilter, nodeGpuFilter, nodeStateFilter, nodeQuery, setNodePartitionFilter, setNodeGpuFilter, setNodeStateFilter, setNodeQuery }} />
         <section id="gpus" className="panel">
           <SectionTitle icon={<Database size={18} />} title="GPU Availability" />
           <GpuTable pools={state.resources?.gpu_pools ?? []} loading={state.loading} />

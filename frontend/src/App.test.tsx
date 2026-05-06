@@ -296,7 +296,7 @@ describe("App", () => {
     expect(screen.getByText(/Showing cached data for nodes/)).toBeInTheDocument();
     expect(screen.getAllByText("a100").length).toBeGreaterThan(0);
     expect(screen.getByText("Node Explorer")).toBeInTheDocument();
-    expect(screen.getByText("Fleet Grid")).toBeInTheDocument();
+    expect(screen.getByText("Fleet Map")).toBeInTheDocument();
     expect(screen.getByText("Queue Pressure")).toBeInTheDocument();
     expect(screen.getByText("Visible Users")).toBeInTheDocument();
     expect(screen.getAllByText("gpu001").length).toBeGreaterThan(0);
@@ -321,6 +321,30 @@ describe("App", () => {
 
     await user.selectOptions(screen.getAllByLabelText("State")[1], "RUNNING");
     expect(screen.getByText("No jobs match the current filters.")).toBeInTheDocument();
+  });
+
+  it("paginates and sorts the node table", async () => {
+    const user = userEvent.setup();
+    const manyNodes = Array.from({ length: 25 }, (_item, index) => ({
+      ...resources.nodes[0],
+      name: `cpu${String(index + 1).padStart(3, "0")}`,
+      cpus_idle: index
+    }));
+    const manyResources = {
+      ...resources,
+      nodes: manyNodes,
+      cluster: { ...resources.cluster, nodes_total: 25, nodes_available: 25 }
+    };
+    mockFetch({
+      "/api/snapshot?scope=mine&days=7": snapshot({ resources: manyResources })
+    });
+
+    render(<App />);
+    expect(await screen.findByText("1-20 of 25")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("21-25 of 25")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Idle CPU/ }));
+    expect(screen.getByText("1-20 of 25")).toBeInTheDocument();
   });
 
   it("renders empty states when no data is available", async () => {

@@ -148,8 +148,8 @@ Cache TTLs:
 ## Power User Dashboard Tools
 
 - Node explorer with partition, state, GPU type, feature/name filters, free CPU/memory/GPU,
-  a compact 284-node fleet grid, grouped summaries, a default first-80 table view, and
-  drain/down reasons.
+  a labeled hardware-class fleet map, selected-node inspector, grouped summaries, a 20-row
+  paginated/sortable table, and drain/down reasons.
 - Partition matrix for fast CPU/GPU/memory/time scanning before opening the detailed table.
 - Queue explorer with mine/lab/cluster privacy scopes, partition/GPU/state/reason/search
   filters, Slurm start estimates, dependencies, node placement, and pending reason labels.
