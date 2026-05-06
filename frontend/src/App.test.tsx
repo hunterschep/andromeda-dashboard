@@ -170,7 +170,17 @@ const queue = {
 
 const history = {
   days: 7,
-  jobs: [],
+  jobs: [
+    {
+      job_id: "90",
+      name: "finished",
+      user: "scheppat",
+      partition: "short",
+      state: "COMPLETED",
+      wait_seconds: 900,
+      runtime_seconds: 2700
+    }
+  ],
   median_wait_seconds: 900,
   median_runtime_seconds: 2700,
   cache: []
@@ -218,20 +228,35 @@ const insights = {
   cache: [{ key: "scheduler", captured_at: null, ttl_seconds: 60, is_stale: false, errors: [] }]
 };
 
+const config = {
+  config_path: "/tmp/config.toml",
+  config_exists: true,
+  ssh_alias: "andromeda",
+  current_user: "scheppat",
+  host: "127.0.0.1",
+  port: 8765,
+  default_scope: "mine",
+  lab_users: 1,
+  cache_path: "/tmp/cache.sqlite3",
+  debug: false
+};
+
+function snapshot(overrides: Record<string, unknown> = {}) {
+  return {
+    config,
+    resources,
+    queue: { ...queue, scope: "mine" },
+    my_jobs: { ...queue, scope: "mine", jobs: [queue.jobs[0]], running: 1, pending: 0 },
+    history,
+    insights,
+    cache: [...resources.cache, ...insights.cache],
+    ...overrides
+  };
+}
+
 function mockFetch(overrides: Record<string, unknown> = {}) {
   const payloads: Record<string, unknown> = {
-    "/api/config/status": {
-      config_path: "/tmp/config.toml",
-      config_exists: true,
-      ssh_alias: "andromeda",
-      current_user: "scheppat",
-      host: "127.0.0.1",
-      port: 8765,
-      default_scope: "mine",
-      lab_users: 1,
-      cache_path: "/tmp/cache.sqlite3",
-      debug: false
-    },
+    "/api/config/status": config,
     "/api/resources": resources,
     "/api/queue?scope=mine": queue,
     "/api/queue?scope=lab": queue,
@@ -239,6 +264,9 @@ function mockFetch(overrides: Record<string, unknown> = {}) {
     "/api/jobs/mine": { ...queue, jobs: [queue.jobs[0]] },
     "/api/history?days=7": history,
     "/api/insights": insights,
+    "/api/snapshot?scope=mine&days=7": snapshot(),
+    "/api/snapshot?scope=lab&days=7": snapshot({ queue: { ...queue, scope: "lab" } }),
+    "/api/snapshot?scope=cluster&days=7": snapshot({ queue: { ...queue, scope: "cluster" } }),
     ...overrides
   };
   vi.stubGlobal(
@@ -268,8 +296,14 @@ describe("App", () => {
     expect(screen.getByText(/Showing cached data for nodes/)).toBeInTheDocument();
     expect(screen.getAllByText("a100").length).toBeGreaterThan(0);
     expect(screen.getByText("Node Explorer")).toBeInTheDocument();
+    expect(screen.getByText("Fleet Grid")).toBeInTheDocument();
+    expect(screen.getByText("Queue Pressure")).toBeInTheDocument();
+    expect(screen.getByText("Visible Users")).toBeInTheDocument();
     expect(screen.getAllByText("gpu001").length).toBeGreaterThan(0);
-    expect(screen.getByText("Waiting for requested CPUs, memory, GPUs, or nodes to free up")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Waiting for requested CPUs, memory, GPUs, or nodes to free up").length
+    ).toBeGreaterThan(0);
+    expect(screen.getByText("COMPLETED")).toBeInTheDocument();
     expect(screen.getByText("Power Tools")).toBeInTheDocument();
     expect(screen.getByText("Identity Probe")).toBeInTheDocument();
     expect(screen.getByText("Cache Diagnostics")).toBeInTheDocument();
@@ -290,11 +324,24 @@ describe("App", () => {
   });
 
   it("renders empty states when no data is available", async () => {
+    const emptyResources = { ...resources, gpu_pools: [], partitions: [], cache: [] };
+    const emptyQueue = { ...queue, jobs: [], running: 0, pending: 0, scope: "mine" };
+    const emptyHistory = { ...history, jobs: [] };
+    const emptyInsights = { ...insights, insights: [], scheduler: null, account_limits: null };
     mockFetch({
-      "/api/resources": { ...resources, gpu_pools: [], partitions: [], cache: [] },
-      "/api/queue?scope=mine": { ...queue, jobs: [], running: 0, pending: 0 },
-      "/api/jobs/mine": { ...queue, jobs: [], running: 0, pending: 0 },
-      "/api/insights": { ...insights, insights: [], scheduler: null, account_limits: null }
+      "/api/resources": emptyResources,
+      "/api/queue?scope=mine": emptyQueue,
+      "/api/jobs/mine": emptyQueue,
+      "/api/history?days=7": emptyHistory,
+      "/api/insights": emptyInsights,
+      "/api/snapshot?scope=mine&days=7": snapshot({
+        resources: emptyResources,
+        queue: emptyQueue,
+        my_jobs: emptyQueue,
+        history: emptyHistory,
+        insights: emptyInsights,
+        cache: []
+      })
     });
 
     render(<App />);

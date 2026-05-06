@@ -116,6 +116,44 @@ main {
   justify-content: flex-end;
 }
 
+.status-line {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.status-line > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.status-line svg {
+  color: var(--accent);
+}
+
+.status-line .segmented {
+  margin-left: auto;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.compact-segmented button {
+  height: 38px;
+}
+
 h1,
 h2,
 p {
@@ -310,6 +348,109 @@ h1 {
   margin-bottom: 12px;
 }
 
+.fleet-panel {
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.fleet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.inline-title {
+  margin-bottom: 0;
+}
+
+.fleet-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.fleet-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fleet-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.legend-idle,
+.fleet-cell.is-idle {
+  background: #8fb267;
+}
+
+.legend-mixed,
+.fleet-cell.is-mixed {
+  background: #d0a04c;
+}
+
+.legend-allocated,
+.fleet-cell.is-allocated {
+  background: #6f755f;
+}
+
+.legend-drain,
+.fleet-cell.is-drain {
+  background: #c87252;
+}
+
+.legend-down,
+.fleet-cell.is-down {
+  background: #9b4d46;
+}
+
+.fleet-cell.is-other {
+  background: #686d61;
+}
+
+.fleet-grid {
+  display: grid;
+  gap: 3px;
+}
+
+.fleet-cell {
+  aspect-ratio: 1;
+  min-width: 9px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 2px;
+  outline: none;
+}
+
+.fleet-cell.has-gpu {
+  box-shadow: inset 0 0 0 1px rgba(240, 239, 230, 0.45);
+}
+
+.fleet-cell:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-strong);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .summary-column {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -381,6 +522,34 @@ input {
   overflow-x: auto;
 }
 
+.section-subtitle {
+  margin-top: 14px;
+}
+
+.availability-matrix {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.matrix-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.9fr) repeat(5, minmax(90px, 1fr));
+  gap: 10px;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-muted);
+}
+
+.matrix-row span {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
 table {
   width: 100%;
   min-width: 760px;
@@ -424,6 +593,89 @@ td span {
   min-width: 180px;
 }
 
+.queue-intel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.intel-panel {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.intel-heading .section-title {
+  margin-bottom: 10px;
+}
+
+.four-up {
+  grid-template-columns: repeat(4, minmax(80px, 1fr));
+  margin: 0 0 12px;
+}
+
+.intel-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.mini-rank {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 8px;
+}
+
+.mini-rank strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mini-rank div,
+.user-workload div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 5px 0;
+  border-top: 1px solid var(--border);
+}
+
+.mini-rank span,
+.user-workload span,
+.user-workload em {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-rank em,
+.user-workload em {
+  color: var(--text);
+  font-family: var(--mono);
+  font-style: normal;
+}
+
+.user-workload {
+  display: grid;
+  gap: 2px;
+}
+
+.user-workload div {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.user-workload strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .two-column {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
@@ -433,6 +685,44 @@ td span {
 .job-list {
   display: grid;
   gap: 10px;
+}
+
+.runtime-panel {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.runtime-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.9fr) 86px minmax(72px, 0.7fr) 74px 60px minmax(70px, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.runtime-row strong {
+  color: var(--text);
+}
+
+.runtime-track {
+  height: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #11130f;
+}
+
+.runtime-track i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
 }
 
 .job-item {
@@ -487,6 +777,10 @@ dd {
 .history-box dl {
   grid-template-columns: repeat(2, minmax(100px, 1fr));
   margin: 0;
+}
+
+.history-table {
+  margin-top: 10px;
 }
 
 .insight-list {
@@ -681,8 +975,18 @@ code {
   .insight-list,
   .tools-grid,
   .command-list,
-  .node-summary {
+  .node-summary,
+  .queue-intel {
     grid-template-columns: 1fr;
+  }
+
+  .intel-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .matrix-row,
+  .runtime-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -719,6 +1023,23 @@ code {
     flex-direction: column;
   }
 
+  .status-line {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .status-line > div,
+  .status-line .segmented {
+    width: 100%;
+    border-right: 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .status-line .segmented {
+    margin-left: 0;
+  }
+
   .overview-strip,
   .filters {
     grid-template-columns: 1fr;
@@ -731,5 +1052,16 @@ code {
 
   .metric:last-child {
     border-bottom: 0;
+  }
+
+  .fleet-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .matrix-row,
+  .runtime-row,
+  .user-workload div {
+    grid-template-columns: 1fr;
   }
 }

@@ -249,6 +249,18 @@ class ConfigStatus(BaseModel):
     debug: bool
 
 
+class DashboardSnapshot(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    config: ConfigStatus
+    resources: ResourceResponse
+    queue: QueueResponse
+    my_jobs: QueueResponse
+    history: HistoryResponse
+    insights: InsightsResponse
+    cache: list[CacheMeta] = Field(default_factory=list)
+
+
 class HealthResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
 

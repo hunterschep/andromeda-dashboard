@@ -1,5 +1,6 @@
 import type {
   ConfigStatus,
+  DashboardSnapshot,
   HistoryResponse,
   InsightsResponse,
   QueueResponse,
@@ -20,7 +21,9 @@ export const api = {
   queue: (scope: "mine" | "lab" | "cluster") => getJson<QueueResponse>(`/api/queue?scope=${scope}`),
   myJobs: () => getJson<QueueResponse>("/api/jobs/mine"),
   history: (days: 7 | 30) => getJson<HistoryResponse>(`/api/history?days=${days}`),
-  insights: () => getJson<InsightsResponse>("/api/insights")
+  insights: () => getJson<InsightsResponse>("/api/insights"),
+  snapshot: (scope: "mine" | "lab" | "cluster", days: 7 | 30) =>
+    getJson<DashboardSnapshot>(`/api/snapshot?scope=${scope}&days=${days}`)
 };
 
 export function formatNumber(value: number | null | undefined): string {

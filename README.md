@@ -9,9 +9,9 @@ use their own SSH config or agent, and run the dashboard locally.
 ## What It Includes
 
 - FastAPI backend with normalized Slurm models and local SQLite stale-cache fallback.
-- React/Vite dashboard for resources, nodes, GPU pools, partitions, queue, jobs, history,
-  insights, scheduler health, QOS/account limits, command helpers, cache diagnostics, and
-  JSON snapshot export.
+- React/Vite dashboard for resources, fleet state, GPU pools, partitions, queue pressure,
+  visible users, jobs, history, insights, scheduler health, QOS/account limits, command
+  helpers, cache diagnostics, auto-refresh, and JSON snapshot export.
 - CLI for config setup, SSH validation, read-only probe runs, and serving the app.
 - Test fixtures covering Slurm JSON quirks, GRES variants, stale fallback, privacy behavior,
   API contracts, frontend filters, empty states, and responsive navigation.
@@ -123,9 +123,12 @@ The dashboard auto-detects the remote Slurm username through the configured SSH 
 - `GET /api/jobs/mine`
 - `GET /api/history?days=7|30`
 - `GET /api/insights`
+- `GET /api/snapshot?scope=mine|lab|cluster&days=7|30`
 
 All endpoints return normalized app types rather than raw Slurm JSON. If one Slurm command
 fails, the API returns cached data when available and includes a stale/error warning.
+The frontend uses `/api/snapshot` for the main page load so overlapping Slurm probes are
+normalized once and cache diagnostics cover every data source the dashboard depends on.
 
 ## Slurm Data Sources
 
@@ -144,16 +147,22 @@ Cache TTLs:
 ## Power User Dashboard Tools
 
 - Node explorer with partition, state, GPU type, feature/name filters, free CPU/memory/GPU,
-  grouped summaries, a default first-80 table view, and drain/down reasons.
+  a compact 284-node fleet grid, grouped summaries, a default first-80 table view, and
+  drain/down reasons.
+- Partition matrix for fast CPU/GPU/memory/time scanning before opening the detailed table.
 - Queue explorer with mine/lab/cluster privacy scopes, partition/GPU/state/reason/search
   filters, Slurm start estimates, dependencies, node placement, and pending reason labels.
+- Queue pressure panel with running/pending totals, pending CPU/GPU demand, top pending
+  reasons, partition load, GPU asks, and visible-user workload.
 - My Jobs panel with elapsed/limit/request/node details and one-click copy for
   `scontrol show job -dd`.
+- Runtime rows for active jobs and a recent accounting table with wait/runtime/state.
 - Scheduler panel with `sdiag` cycle/backfill values and `sprio -w` priority weights.
 - Account limits panel with visible `sacctmgr` association and QOS limits.
 - Read-only command helpers for identity probes, quotas, node/queue JSON, start estimates,
   accounting history, scheduler health, and QOS checks.
 - Cache diagnostics showing freshness, TTL, capture time, and last command error.
+- Manual, 30-second, and 60-second refresh modes with last-loaded and stale-cache status.
 - JSON snapshot export for bug reports, lab discussion, or offline inspection.
 
 ## Privacy Defaults

@@ -11,6 +11,7 @@ from .models import (
     AccountLimits,
     CacheMeta,
     ConfigStatus,
+    DashboardSnapshot,
     HistoryResponse,
     InsightsResponse,
     QueueResponse,
@@ -131,7 +132,7 @@ class SlurmCollector:
         remote_user = str(identity.payload or "").strip().splitlines()[0:1]
         return remote_user[0] if remote_user and remote_user[0] else self.settings.current_user
 
-    def get_resources(self) -> ResourceResponse:
+    def get_resources(self, cluster_queue: QueueResponse | None = None) -> ResourceResponse:
         nodes_raw = self._run(NODES)
         partitions_raw = self._run(PARTITIONS)
         sinfo_raw = self._run(SINFO)
@@ -139,7 +140,7 @@ class SlurmCollector:
         partitions = normalize_partitions(
             partitions_raw.payload if isinstance(partitions_raw.payload, dict) else {}, nodes
         )
-        queue = self.get_queue(scope="cluster")
+        queue = cluster_queue or self.get_queue(scope="cluster")
         return ResourceResponse(
             nodes=nodes,
             gpu_pools=normalize_gpu_pools(nodes),
@@ -189,29 +190,45 @@ class SlurmCollector:
         return response
 
     def get_account_limits(self) -> AccountLimits:
+        account_limits, _cache = self._get_account_limits_with_cache()
+        return account_limits
+
+    def _get_account_limits_with_cache(self) -> tuple[AccountLimits, list[CacheMeta]]:
         qos_raw = self._run(QOS)
         assoc_raw = self._run(ASSOC)
         account_limits = parse_sacctmgr_assoc(str(assoc_raw.payload or ""))
         account_limits.qos = parse_sacctmgr_qos(str(qos_raw.payload or ""))
-        return account_limits
+        return account_limits, [qos_raw.meta, assoc_raw.meta]
 
     def get_scheduler_health(self):
+        scheduler, _cache = self._get_scheduler_health_with_cache()
+        return scheduler
+
+    def _get_scheduler_health_with_cache(self):
         scheduler_raw = self._run(SCHEDULER)
         sprio_raw = self._run(SPRIO)
         health = parse_sdiag(str(scheduler_raw.payload or ""))
         health.priority_weights = parse_sprio_weights(str(sprio_raw.payload or ""))
-        return health
+        return health, [scheduler_raw.meta, sprio_raw.meta]
 
-    def get_insights(self) -> InsightsResponse:
-        resources = self.get_resources()
-        queue = self.get_queue(scope=self.settings.privacy.default_scope)
-        history = self.get_history(days=self.settings.history.default_days)
-        account_limits = self.get_account_limits()
-        scheduler = self.get_scheduler_health()
+    def get_insights(
+        self,
+        *,
+        resources: ResourceResponse | None = None,
+        queue: QueueResponse | None = None,
+        history: HistoryResponse | None = None,
+    ) -> InsightsResponse:
+        resources = resources or self.get_resources()
+        queue = queue or self.get_queue(scope=self.settings.privacy.default_scope)
+        history = history or self.get_history(days=self.settings.history.default_days)
+        account_limits, account_cache = self._get_account_limits_with_cache()
+        scheduler, scheduler_cache = self._get_scheduler_health_with_cache()
         cache: list[CacheMeta] = [
             *resources.cache,
             *queue.cache,
             *history.cache,
+            *account_cache,
+            *scheduler_cache,
         ]
         insights = build_insights(resources, queue, history, account_limits, scheduler)
         return InsightsResponse(
@@ -220,3 +237,39 @@ class SlurmCollector:
             account_limits=account_limits,
             cache=cache,
         )
+
+    def get_snapshot(
+        self,
+        scope: Literal["mine", "lab", "cluster"] = "mine",
+        days: int | None = None,
+    ) -> DashboardSnapshot:
+        config = self.config_status()
+        queue = self.get_queue(scope=scope)
+        my_jobs = queue if scope == "mine" else self.get_queue(scope="mine")
+        cluster_queue = queue if scope == "cluster" else self.get_queue(scope="cluster")
+        resources = self.get_resources(cluster_queue=cluster_queue)
+        history = self.get_history(days=days)
+        insights = self.get_insights(resources=resources, queue=queue, history=history)
+        cache = self._dedupe_cache(
+            [
+                *resources.cache,
+                *queue.cache,
+                *my_jobs.cache,
+                *history.cache,
+                *insights.cache,
+            ]
+        )
+        return DashboardSnapshot(
+            config=config,
+            resources=resources,
+            queue=queue,
+            my_jobs=my_jobs,
+            history=history,
+            insights=insights,
+            cache=cache,
+        )
+
+    @staticmethod
+    def _dedupe_cache(cache: list[CacheMeta]) -> list[CacheMeta]:
+        by_key = {meta.key: meta for meta in cache}
+        return [by_key[key] for key in sorted(by_key)]

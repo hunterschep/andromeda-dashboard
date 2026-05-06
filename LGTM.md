@@ -28,6 +28,8 @@ ANDROMEDA_LIVE_TEST=1 .venv/bin/pytest tests/test_live_smoke.py
 - No plaintext passwords, SSH keys, tokens, or submit lines are stored or displayed.
 - One failed Slurm command degrades to cached data where available.
 - Mine/lab/cluster queue scopes preserve privacy defaults.
-- Node, GPU, partition, queue, job, history, scheduler, QOS, cache, command-helper, and JSON
-  export surfaces load without runtime errors.
+- `/api/snapshot` returns config, resources, selected queue, my jobs, history, insights, and
+  probe cache metadata in one normalized payload.
+- Node, GPU, partition, queue, job, history, scheduler, QOS, cache, command-helper, fleet-grid,
+  queue-pressure, visible-user, auto-refresh, and JSON export surfaces load without runtime errors.
 - The UI remains readable at desktop and narrow widths.

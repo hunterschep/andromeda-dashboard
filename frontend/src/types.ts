@@ -193,3 +193,13 @@ export type ConfigStatus = {
   cache_path: string;
   debug: boolean;
 };
+
+export type DashboardSnapshot = {
+  config: ConfigStatus;
+  resources: ResourceResponse;
+  queue: QueueResponse;
+  my_jobs: QueueResponse;
+  history: HistoryResponse;
+  insights: InsightsResponse;
+  cache: CacheMeta[];
+};

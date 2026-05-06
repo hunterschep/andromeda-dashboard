@@ -62,6 +62,13 @@ def create_app(
     def insights():
         return app.state.collector.get_insights()
 
+    @app.get("/api/snapshot")
+    def snapshot(
+        scope: Literal["mine", "lab", "cluster"] = Query("mine"),
+        days: int = Query(7),
+    ):
+        return app.state.collector.get_snapshot(scope=scope, days=days)
+
     dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
     if dist.exists():
         app.mount("/", StaticFiles(directory=dist, html=True), name="frontend")

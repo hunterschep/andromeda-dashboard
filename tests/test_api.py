@@ -85,3 +85,20 @@ def test_api_contracts(load_json, load_text, tmp_path):
     insights = client.get("/api/insights").json()
     assert insights["insights"]
     assert insights["scheduler"]["backfill_last_depth"] == 120
+
+    snapshot = client.get("/api/snapshot?scope=mine&days=7").json()
+    assert set(snapshot) >= {
+        "config",
+        "resources",
+        "queue",
+        "my_jobs",
+        "history",
+        "insights",
+        "cache",
+    }
+    assert snapshot["config"]["current_user"] == "hunterschep"
+    assert snapshot["queue"]["scope"] == "mine"
+    assert [job["job_id"] for job in snapshot["my_jobs"]["jobs"]] == ["101"]
+    assert snapshot["resources"]["cluster"]["nodes_total"] == 4
+    assert snapshot["history"]["median_wait_seconds"] == 900
+    assert snapshot["cache"]

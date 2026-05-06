@@ -1,5 +1,7 @@
 import {
+  Activity,
   AlertTriangle,
+  Clock3,
   Clipboard,
   Copy,
   Cpu,
@@ -9,12 +11,15 @@ import {
   Gauge,
   HardDrive,
   ListFilter,
+  Network,
   RefreshCw,
+  Rows3,
   Search,
   Server,
   Settings,
   Terminal,
-  User
+  User,
+  Users
 } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, formatDuration, formatMemory, formatNumber, shortTime } from "./api";
@@ -41,6 +46,8 @@ type LoadState = {
   myJobs: QueueResponse | null;
   history: HistoryResponse | null;
   insightsData: InsightsResponse | null;
+  cache: CacheMeta[];
+  loadedAt: string | null;
   loading: boolean;
   error: string | null;
 };
@@ -60,6 +67,8 @@ const emptyState: LoadState = {
   myJobs: null,
   history: null,
   insightsData: null,
+  cache: [],
+  loadedAt: null,
   loading: true,
   error: null
 };
@@ -79,26 +88,24 @@ export function App() {
   const [nodeStateFilter, setNodeStateFilter] = useState("all");
   const [nodeQuery, setNodeQuery] = useState("");
   const [showAllNodes, setShowAllNodes] = useState(false);
+  const [refreshCadence, setRefreshCadence] = useState<"off" | "30" | "60">("off");
   const [copied, setCopied] = useState<string | null>(null);
 
-  async function load(selectedScope = scope) {
-    setState((current) => ({ ...current, loading: true, error: null }));
+  async function load(selectedScope = scope, silent = false) {
+    if (!silent) {
+      setState((current) => ({ ...current, loading: true, error: null }));
+    }
     try {
-      const [config, resources, queue, myJobs, history, insightsData] = await Promise.all([
-        api.config(),
-        api.resources(),
-        api.queue(selectedScope),
-        api.myJobs(),
-        api.history(7),
-        api.insights()
-      ]);
+      const snapshot = await api.snapshot(selectedScope, 7);
       setState({
-        config,
-        resources,
-        queue,
-        myJobs,
-        history,
-        insightsData,
+        config: snapshot.config,
+        resources: snapshot.resources,
+        queue: snapshot.queue,
+        myJobs: snapshot.my_jobs,
+        history: snapshot.history,
+        insightsData: snapshot.insights,
+        cache: snapshot.cache,
+        loadedAt: new Date().toISOString(),
         loading: false,
         error: null
       });
@@ -116,10 +123,19 @@ export function App() {
   }, [scope]);
 
   useEffect(() => {
+    if (refreshCadence === "off") return undefined;
+    const interval = window.setInterval(() => {
+      void load(scope, true);
+    }, Number(refreshCadence) * 1000);
+    return () => window.clearInterval(interval);
+  }, [refreshCadence, scope]);
+
+  useEffect(() => {
     setShowAllNodes(false);
   }, [nodePartitionFilter, nodeGpuFilter, nodeStateFilter, nodeQuery]);
 
   const allCache = useMemo(() => {
+    if (state.cache.length) return dedupeCache(state.cache);
     return dedupeCache([
       ...(state.resources?.cache ?? []),
       ...(state.queue?.cache ?? []),
@@ -127,7 +143,7 @@ export function App() {
       ...(state.history?.cache ?? []),
       ...(state.insightsData?.cache ?? [])
     ]);
-  }, [state.resources, state.queue, state.myJobs, state.history, state.insightsData]);
+  }, [state.cache, state.resources, state.queue, state.myJobs, state.history, state.insightsData]);
 
   const stale = useMemo(() => allCache.filter((meta) => meta.is_stale), [allCache]);
   const partitions = state.resources?.partitions ?? [];
@@ -167,6 +183,11 @@ export function App() {
     ? filteredNodes
     : filteredNodes.slice(0, NODE_PREVIEW_LIMIT);
   const nodeSummary = useMemo(() => summarizeNodes(filteredNodes), [filteredNodes]);
+  const queuePressure = useMemo(
+    () => summarizeQueuePressure(state.queue?.jobs ?? []),
+    [state.queue]
+  );
+  const userWorkload = useMemo(() => summarizeUsers(state.queue?.jobs ?? []), [state.queue]);
 
   const cluster = state.resources?.cluster;
   const alias = state.config?.ssh_alias ?? "andromeda";
@@ -240,7 +261,9 @@ export function App() {
         <header className="topbar">
           <div>
             <h1>Compute Dashboard</h1>
-            <p>Read-only Slurm resources from the configured SSH alias.</p>
+            <p>
+              {alias} / {state.config?.current_user ?? "remote user"} / {state.queue?.scope ?? scope}
+            </p>
           </div>
           <div className="toolbar">
             <button type="button" className="icon-button" onClick={exportSnapshot}>
@@ -258,6 +281,16 @@ export function App() {
             </button>
           </div>
         </header>
+
+        <StatusLine
+          loadedAt={state.loadedAt}
+          loading={state.loading}
+          staleCount={stale.length}
+          cacheCount={allCache.length}
+          scope={state.queue?.scope ?? scope}
+          refreshCadence={refreshCadence}
+          onRefreshCadence={setRefreshCadence}
+        />
 
         {state.error ? (
           <div className="notice error" role="alert">
@@ -353,6 +386,7 @@ export function App() {
               />
             </label>
           </div>
+          <FleetGrid nodes={filteredNodes} />
           <NodeSummary summary={nodeSummary} />
           <NodeTable nodes={displayedNodes} />
         </section>
@@ -363,7 +397,11 @@ export function App() {
         </section>
 
         <section id="partitions" className="panel">
-          <SectionTitle icon={<Server size={18} />} title="Partitions" />
+          <SectionTitle icon={<Rows3 size={18} />} title="Partition Matrix" />
+          <PartitionMatrix partitions={partitions} />
+          <div className="section-subtitle">
+            <SectionTitle icon={<Server size={18} />} title="Partition Detail" />
+          </div>
           <PartitionTable partitions={partitions} />
         </section>
 
@@ -402,6 +440,10 @@ export function App() {
               />
             </label>
           </div>
+          <div className="queue-intel">
+            <QueuePressurePanel summary={queuePressure} />
+            <UserWorkloadPanel users={userWorkload} />
+          </div>
           <QueueTable jobs={filteredJobs} />
         </section>
 
@@ -411,11 +453,13 @@ export function App() {
               icon={<User size={18} />}
               title={`My Jobs - ${state.config?.current_user ?? "remote user"}`}
             />
+            <JobRuntimePanel jobs={state.myJobs?.jobs ?? []} />
             <JobList jobs={state.myJobs?.jobs ?? []} onCopy={copyText} alias={alias} />
           </div>
           <div>
-            <SectionTitle icon={<Gauge size={18} />} title="Recent History" />
+            <SectionTitle icon={<Clock3 size={18} />} title="Recent History" />
             <HistoryBox history={state.history} />
+            <HistoryTable history={state.history} />
           </div>
         </section>
 
@@ -473,6 +517,72 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   );
 }
 
+function StatusLine({
+  loadedAt,
+  loading,
+  staleCount,
+  cacheCount,
+  scope,
+  refreshCadence,
+  onRefreshCadence
+}: {
+  loadedAt: string | null;
+  loading: boolean;
+  staleCount: number;
+  cacheCount: number;
+  scope: "mine" | "lab" | "cluster";
+  refreshCadence: "off" | "30" | "60";
+  onRefreshCadence: (value: "off" | "30" | "60") => void;
+}) {
+  return (
+    <div className="status-line" aria-label="Dashboard status">
+      <div>
+        <Activity size={16} aria-hidden="true" />
+        <span>{loading ? "loading" : "ready"}</span>
+      </div>
+      <div>
+        <Database size={16} aria-hidden="true" />
+        <span>
+          {cacheCount} cache {cacheCount === 1 ? "entry" : "entries"}
+          {staleCount ? ` / ${staleCount} stale` : ""}
+        </span>
+      </div>
+      <div>
+        <Filter size={16} aria-hidden="true" />
+        <span>{scope}</span>
+      </div>
+      <div>
+        <Clock3 size={16} aria-hidden="true" />
+        <span>{loadedAt ? shortTime(loadedAt) : "not loaded"}</span>
+      </div>
+      <RefreshControl cadence={refreshCadence} onCadence={onRefreshCadence} />
+    </div>
+  );
+}
+
+function RefreshControl({
+  cadence,
+  onCadence
+}: {
+  cadence: "off" | "30" | "60";
+  onCadence: (value: "off" | "30" | "60") => void;
+}) {
+  return (
+    <div className="segmented compact-segmented" aria-label="Auto refresh">
+      {(["off", "30", "60"] as const).map((item) => (
+        <button
+          type="button"
+          key={item}
+          className={cadence === item ? "active" : ""}
+          onClick={() => onCadence(item)}
+        >
+          {item === "off" ? "manual" : `${item}s`}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function FilterSelect({
   label,
   value,
@@ -518,6 +628,64 @@ function ScopeControl({
           {item}
         </button>
       ))}
+    </div>
+  );
+}
+
+function FleetGrid({ nodes }: { nodes: NodeResource[] }) {
+  if (!nodes.length) return <EmptyState text="No nodes match the current filters." />;
+  const columns = Math.min(32, Math.max(12, Math.ceil(Math.sqrt(nodes.length * 1.9))));
+  return (
+    <div className="fleet-panel">
+      <div className="fleet-head">
+        <div className="section-title inline-title">
+          <Network size={18} aria-hidden="true" />
+          <h2>Fleet Grid</h2>
+        </div>
+        <FleetLegend />
+      </div>
+      <div
+        className="fleet-grid"
+        role="list"
+        aria-label={`${nodes.length} filtered nodes`}
+        style={{ gridTemplateColumns: `repeat(${columns}, minmax(9px, 1fr))` }}
+      >
+        {nodes.map((node) => (
+          <div
+            key={node.name}
+            role="listitem"
+            tabIndex={0}
+            className={`fleet-cell ${fleetClass(node)} ${node.gpu_total ? "has-gpu" : ""}`}
+            title={`${node.name} / ${stateText(node)} / ${node.cpus_idle} idle CPU / ${node.gpu_free} free GPU / ${formatMemory(node.memory_free_mb)}`}
+          >
+            <span className="sr-only">
+              {node.name} {stateText(node)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FleetLegend() {
+  return (
+    <div className="fleet-legend" aria-label="Fleet legend">
+      <span>
+        <i className="legend-idle" aria-hidden="true" /> idle
+      </span>
+      <span>
+        <i className="legend-mixed" aria-hidden="true" /> mixed
+      </span>
+      <span>
+        <i className="legend-allocated" aria-hidden="true" /> allocated
+      </span>
+      <span>
+        <i className="legend-drain" aria-hidden="true" /> drain
+      </span>
+      <span>
+        <i className="legend-down" aria-hidden="true" /> down
+      </span>
     </div>
   );
 }
@@ -643,6 +811,24 @@ function GpuTable({ pools, loading }: { pools: GpuPool[]; loading: boolean }) {
   );
 }
 
+function PartitionMatrix({ partitions }: { partitions: PartitionSummary[] }) {
+  if (!partitions.length) return <EmptyState text="No partition matrix available." />;
+  return (
+    <div className="availability-matrix" aria-label="Partition availability matrix">
+      {partitions.map((partition) => (
+        <div className="matrix-row" key={partition.name}>
+          <strong className="mono">{partition.name}</strong>
+          <span>{partition.idle_nodes} idle nodes</span>
+          <span>{formatNumber(partition.cpus_idle)} idle CPU</span>
+          <span>{partition.gpu_free} free GPU</span>
+          <span>{formatMemory(partition.memory_free_mb)}</span>
+          <span>{partition.max_time ?? "n/a"}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PartitionTable({ partitions }: { partitions: PartitionSummary[] }) {
   if (!partitions.length) return <EmptyState text="No partition metadata available." />;
   return (
@@ -720,6 +906,133 @@ function QueueTable({ jobs }: { jobs: QueueJob[] }) {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function QueuePressurePanel({
+  summary
+}: {
+  summary: {
+    running: number;
+    pending: number;
+    pendingCpus: number;
+    pendingGpus: number;
+    reasons: [string, number][];
+    partitions: [string, number][];
+    gpus: [string, number][];
+  };
+}) {
+  return (
+    <div className="intel-panel">
+      <div className="intel-heading">
+        <SectionTitle icon={<Gauge size={18} />} title="Queue Pressure" />
+      </div>
+      <dl className="compact-dl four-up">
+        <div>
+          <dt>Running</dt>
+          <dd>{summary.running}</dd>
+        </div>
+        <div>
+          <dt>Pending</dt>
+          <dd>{summary.pending}</dd>
+        </div>
+        <div>
+          <dt>Pending CPU</dt>
+          <dd>{formatNumber(summary.pendingCpus)}</dd>
+        </div>
+        <div>
+          <dt>Pending GPU</dt>
+          <dd>{summary.pendingGpus}</dd>
+        </div>
+      </dl>
+      <div className="intel-columns">
+        <MiniRank title="Reasons" rows={summary.reasons} empty="none" />
+        <MiniRank title="Partitions" rows={summary.partitions} empty="none" />
+        <MiniRank title="GPU asks" rows={summary.gpus} empty="none" />
+      </div>
+    </div>
+  );
+}
+
+function UserWorkloadPanel({
+  users
+}: {
+  users: { user: string; running: number; pending: number; cpus: number; gpus: number }[];
+}) {
+  return (
+    <div className="intel-panel">
+      <div className="intel-heading">
+        <SectionTitle icon={<Users size={18} />} title="Visible Users" />
+      </div>
+      {users.length ? (
+        <div className="user-workload">
+          {users.slice(0, 8).map((user) => (
+            <div key={user.user}>
+              <strong>{user.user}</strong>
+              <span>
+                {user.running} run / {user.pending} pend
+              </span>
+              <em>
+                {formatNumber(user.cpus)} CPU / {user.gpus} GPU
+              </em>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState text="No visible users in this scope." />
+      )}
+    </div>
+  );
+}
+
+function MiniRank({ title, rows, empty }: { title: string; rows: [string, number][]; empty: string }) {
+  return (
+    <div className="mini-rank">
+      <strong>{title}</strong>
+      {rows.length ? (
+        rows.slice(0, 5).map(([label, count]) => (
+          <div key={label}>
+            <span>{label}</span>
+            <em>{count}</em>
+          </div>
+        ))
+      ) : (
+        <div>
+          <span>{empty}</span>
+          <em>0</em>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function JobRuntimePanel({ jobs }: { jobs: QueueJob[] }) {
+  const visible = jobs
+    .slice()
+    .sort((left, right) => jobSortScore(right) - jobSortScore(left))
+    .slice(0, 10);
+  if (!visible.length) return null;
+  return (
+    <div className="runtime-panel">
+      {visible.map((job) => {
+        const progress =
+          job.elapsed_seconds && job.time_limit_seconds
+            ? Math.min(100, Math.round((job.elapsed_seconds / job.time_limit_seconds) * 100))
+            : null;
+        return (
+          <div className="runtime-row" key={job.job_id}>
+            <strong className="mono">{job.job_id}</strong>
+            <span>{job.state}</span>
+            <span>{job.partition ?? "n/a"}</span>
+            <span>{formatDuration(job.elapsed_seconds)}</span>
+            <span>{job.gpu_count} GPU</span>
+            <div className="runtime-track" aria-label={`${job.job_id} runtime`}>
+              <i style={{ width: `${progress ?? 0}%` }} />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -807,6 +1120,37 @@ function HistoryBox({ history }: { history: HistoryResponse | null }) {
           <dd>{formatDuration(history?.median_runtime_seconds)}</dd>
         </div>
       </dl>
+    </div>
+  );
+}
+
+function HistoryTable({ history }: { history: HistoryResponse | null }) {
+  const jobs = history?.jobs.slice(0, 12) ?? [];
+  if (!jobs.length) return <EmptyState text="No accounting rows in this window." />;
+  return (
+    <div className="table-wrap history-table">
+      <table className="compact-table">
+        <thead>
+          <tr>
+            <th>Job</th>
+            <th>State</th>
+            <th>Partition</th>
+            <th>Wait</th>
+            <th>Runtime</th>
+          </tr>
+        </thead>
+        <tbody>
+          {jobs.map((job) => (
+            <tr key={job.job_id}>
+              <td className="mono">{job.job_id}</td>
+              <td>{job.state}</td>
+              <td>{job.partition ?? "n/a"}</td>
+              <td>{formatDuration(job.wait_seconds)}</td>
+              <td>{formatDuration(job.runtime_seconds)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -989,6 +1333,16 @@ function gpuInventoryText(node: NodeResource): string {
   return node.gres.map((gpu) => `${gpu.type} ${gpu.free}/${gpu.total}`).join(", ");
 }
 
+function fleetClass(node: NodeResource): string {
+  const state = stateText(node).toLowerCase();
+  if (state.includes("down") || state.includes("fail")) return "is-down";
+  if (state.includes("drain")) return "is-drain";
+  if (state.includes("mixed")) return "is-mixed";
+  if (state.includes("alloc")) return "is-allocated";
+  if (state.includes("idle")) return "is-idle";
+  return "is-other";
+}
+
 function secondsText(value: number | null): string {
   if (value === null || value === undefined) return "n/a";
   return `${value.toFixed(2)}s`;
@@ -1099,4 +1453,81 @@ function summarizeNodes(nodes: NodeResource[]) {
     gpus: Array.from(gpus.entries()).sort(byCount),
     partitions: Array.from(partitions.entries()).sort(byCount)
   };
+}
+
+function summarizeQueuePressure(jobs: QueueJob[]) {
+  const reasons = new Map<string, number>();
+  const partitions = new Map<string, number>();
+  const gpus = new Map<string, number>();
+  let running = 0;
+  let pending = 0;
+  let pendingCpus = 0;
+  let pendingGpus = 0;
+
+  for (const job of jobs) {
+    if (job.state === "RUNNING") running += 1;
+    if (job.state === "PENDING") {
+      pending += 1;
+      pendingCpus += job.cpus;
+      pendingGpus += job.gpu_count;
+      reasons.set(
+        job.reason_label ?? job.state_reason ?? "not specified",
+        (reasons.get(job.reason_label ?? job.state_reason ?? "not specified") ?? 0) + 1
+      );
+    }
+    partitions.set(job.partition ?? "none", (partitions.get(job.partition ?? "none") ?? 0) + 1);
+    if (job.gpus.length) {
+      for (const gpu of job.gpus) {
+        gpus.set(gpu.type, (gpus.get(gpu.type) ?? 0) + gpu.count);
+      }
+    } else {
+      gpus.set("cpu-only", (gpus.get("cpu-only") ?? 0) + 1);
+    }
+  }
+
+  return {
+    running,
+    pending,
+    pendingCpus,
+    pendingGpus,
+    reasons: rankEntries(reasons),
+    partitions: rankEntries(partitions),
+    gpus: rankEntries(gpus)
+  };
+}
+
+function summarizeUsers(jobs: QueueJob[]) {
+  const byUser = new Map<string, { user: string; running: number; pending: number; cpus: number; gpus: number }>();
+  for (const job of jobs) {
+    const current = byUser.get(job.user) ?? {
+      user: job.user,
+      running: 0,
+      pending: 0,
+      cpus: 0,
+      gpus: 0
+    };
+    if (job.state === "RUNNING") current.running += 1;
+    if (job.state === "PENDING") current.pending += 1;
+    current.cpus += job.cpus;
+    current.gpus += job.gpu_count;
+    byUser.set(job.user, current);
+  }
+  return Array.from(byUser.values()).sort(
+    (left, right) =>
+      right.running + right.pending - (left.running + left.pending) ||
+      right.gpus - left.gpus ||
+      right.cpus - left.cpus ||
+      left.user.localeCompare(right.user)
+  );
+}
+
+function rankEntries(values: Map<string, number>): [string, number][] {
+  return Array.from(values.entries()).sort(
+    (left, right) => right[1] - left[1] || left[0].localeCompare(right[0])
+  );
+}
+
+function jobSortScore(job: QueueJob): number {
+  const stateWeight = job.state === "RUNNING" ? 10_000 : job.state === "PENDING" ? 5_000 : 0;
+  return stateWeight + (job.gpu_count * 250) + job.cpus;
 }
