@@ -1,0 +1,50 @@
+{
+  "jobs": [
+    {
+      "job_id": 101,
+      "name": "train-a100",
+      "user_name": "hunterschep",
+      "account": "lab",
+      "partition": "short",
+      "job_state": "RUNNING",
+      "state_reason": "None",
+      "cpus": 8,
+      "minimum_memory_per_node": "64G",
+      "tres_per_node": "gres/gpu:a100=1,cpu=8,mem=64G",
+      "submit_time": "2026-05-06T02:00:00+00:00",
+      "start_time": "2026-05-06T02:15:00+00:00",
+      "time_limit": "12:00:00",
+      "time_used": "01:10:00",
+      "priority": 1200,
+      "nodes": "gpu001"
+    },
+    {
+      "job_id": 102,
+      "name": "cpu-grid",
+      "user_name": "labmate",
+      "account": "lab",
+      "partition": "medium",
+      "job_state": "PENDING",
+      "state_reason": "Resources",
+      "cpus": 44,
+      "minimum_memory_per_node": "180G",
+      "tres_req_str": "cpu=44,mem=180G",
+      "submit_time": "2026-05-06T03:00:00+00:00",
+      "priority": 900
+    },
+    {
+      "job_id": 103,
+      "name": "private-job",
+      "user_name": "otheruser",
+      "account": "other",
+      "partition": "long",
+      "job_state": "PENDING",
+      "state_reason": "Dependency",
+      "dependency": "afterok:99",
+      "cpus": 16,
+      "minimum_memory_per_node": "32G",
+      "submit_time": "2026-05-06T04:00:00+00:00",
+      "priority": 100
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "partitions": [
+    {
+      "name": "interactive",
+      "max_time": "12:00:00",
+      "default_time": "01:00:00",
+      "qos": ["int"],
+      "tres": "cpu=48,gres/gpu=6,mem=256G"
+    },
+    {
+      "name": "short",
+      "max_time": "12:00:00",
+      "default_time": "04:00:00",
+      "qos": ["normal"],
+      "tres": "cpu=156,gres/gpu=6,mem=948G"
+    },
+    {
+      "name": "medium",
+      "max_time": "2-00:00:00",
+      "default_time": "12:00:00",
+      "qos": ["normal"]
+    },
+    {
+      "name": "long",
+      "max_time": "5-00:00:00",
+      "default_time": "1-00:00:00",
+      "qos": ["normal"]
+    }
+  ]
+}

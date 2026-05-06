@@ -1,0 +1,51 @@
+{
+  "nodes": [
+    {
+      "name": "cpu001",
+      "state": "IDLE",
+      "partitions": ["short", "medium"],
+      "features": "rome,large-mem",
+      "cpus": 44,
+      "alloc_cpus": 0,
+      "real_memory": 184320,
+      "free_memory": 184320,
+      "gres": ""
+    },
+    {
+      "name": "gpu001",
+      "state": "MIXED",
+      "partitions": ["short"],
+      "features": "a100",
+      "cpus": 64,
+      "alloc_cpus": 32,
+      "real_memory": 512000,
+      "free_memory": 250000,
+      "gres": "gpu:a100:4",
+      "gres_used": "gpu:a100:2(IDX:0-1)"
+    },
+    {
+      "name": "gpu002",
+      "state": "DRAIN",
+      "partitions": ["long"],
+      "features": "h200",
+      "cpus": 128,
+      "alloc_cpus": 0,
+      "real_memory": "1T",
+      "free_memory": "900G",
+      "gres": "gpu:h200:8(S:0-1)",
+      "gres_used": "gpu:h200:1",
+      "reason": "maintenance"
+    },
+    {
+      "name": "gpu003",
+      "state": "IDLE",
+      "partitions": ["short", "interactive"],
+      "features": "mixed-gpu",
+      "cpus": 48,
+      "alloc_cpus": 0,
+      "real_memory": "256G",
+      "free_memory": "256G",
+      "gres": "gpu:l40s:4,gpu:a10:2"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+normal|2000|3000|cpu=3600
+int|2||cpu=16,gres/gpu=1,mem=64G

@@ -1,0 +1,2 @@
+          JOBID PARTITION     USER   PRIORITY        SITE         AGE  FAIRSHARE    JOBSIZE  PARTITION        QOS        TRES
+        Weights                               1           0        1000      10000       1000      10000      10000        5000

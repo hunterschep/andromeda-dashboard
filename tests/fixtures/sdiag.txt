@@ -1,0 +1,7 @@
+Main schedule statistics (microseconds):
+	Last cycle: 250000
+	Mean cycle: 1500000
+Backfilling stats
+	bf last depth: 120
+	bf last cycle: 4000000
+Jobs submitted: 55

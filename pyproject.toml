@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "andromeda-dashboard"
+version = "0.1.0"
+description = "Local read-only dashboard for Boston College Andromeda Slurm resources."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Andromeda Dashboard Contributors" }]
+keywords = ["slurm", "hpc", "fastapi", "dashboard", "andromeda"]
+dependencies = [
+  "fastapi>=0.111,<1.0",
+  "pydantic>=2.7,<3.0",
+  "typer>=0.12,<1.0",
+  "rich>=13.7,<15.0",
+  "uvicorn[standard]>=0.30,<1.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx>=0.27,<1.0",
+  "pytest>=8.2,<9.0",
+  "pytest-asyncio>=0.23,<1.0",
+  "ruff>=0.6,<1.0"
+]
+
+[project.scripts]
+andromeda-dashboard = "andromeda_dashboard.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/andromeda_dashboard"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]

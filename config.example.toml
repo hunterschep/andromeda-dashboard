@@ -1,0 +1,22 @@
+[ssh]
+alias = "andromeda"
+connect_timeout_seconds = 8
+command_timeout_seconds = 25
+control_master = true
+
+[server]
+host = "127.0.0.1"
+port = 8765
+
+[privacy]
+debug = false
+default_scope = "mine"
+
+[lab]
+users = []
+
+[cache]
+path = "~/.cache/andromeda-dashboard/cache.sqlite3"
+
+[history]
+default_days = 7

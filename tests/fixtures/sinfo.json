@@ -1,0 +1,14 @@
+{
+  "sinfo": [
+    {
+      "partition": "short",
+      "availability": "up",
+      "nodes": {
+        "allocated": 1,
+        "idle": 2,
+        "other": 0,
+        "total": 3
+      }
+    }
+  ]
+}

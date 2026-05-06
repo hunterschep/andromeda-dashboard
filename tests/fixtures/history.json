@@ -1,0 +1,33 @@
+{
+  "jobs": [
+    {
+      "job_id": "90",
+      "name": "done-cpu",
+      "user": "hunterschep",
+      "account": "lab",
+      "partition": "short",
+      "state": "COMPLETED",
+      "exit_code": "0:0",
+      "submit_time": "2026-05-05T01:00:00+00:00",
+      "start_time": "2026-05-05T01:20:00+00:00",
+      "end_time": "2026-05-05T02:20:00+00:00",
+      "req_tres": "cpu=4,mem=16G",
+      "alloc_tres": "cpu=4,mem=16G"
+    },
+    {
+      "job_id": "91",
+      "name": "failed-gpu",
+      "user": "hunterschep",
+      "account": "lab",
+      "partition": "short",
+      "state": "FAILED",
+      "exit_code": "1:0",
+      "submit_time": "2026-05-05T03:00:00+00:00",
+      "start_time": "2026-05-05T03:10:00+00:00",
+      "end_time": "2026-05-05T03:40:00+00:00",
+      "req_tres": "cpu=8,gres/gpu=1,mem=64G",
+      "alloc_tres": "cpu=8,gres/gpu=1,mem=64G",
+      "submit_line": "sbatch secret.sh --token hidden"
+    }
+  ]
+}
