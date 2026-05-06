@@ -156,11 +156,28 @@ export type SchedulerHealth = {
   backfill_last_depth: number | null;
   backfill_last_cycle_seconds: number | null;
   queue_depth: number | null;
+  priority_weights: Record<string, number>;
+  raw: Record<string, string>;
+};
+
+export type QosLimit = {
+  name: string;
+  max_jobs_per_user: number | null;
+  max_submit_per_user: number | null;
+  max_tres_per_user: Record<string, string>;
+};
+
+export type AccountLimits = {
+  user: string | null;
+  account: string | null;
+  qos: QosLimit[];
+  raw_rows: Record<string, string>[];
 };
 
 export type InsightsResponse = {
   insights: Insight[];
   scheduler: SchedulerHealth | null;
+  account_limits: AccountLimits | null;
   cache: CacheMeta[];
 };
 
