@@ -7,6 +7,7 @@ This repo is ready to ship when the checklist below passes on a clean worktree.
 ```bash
 .venv/bin/pytest
 .venv/bin/ruff check .
+python scripts/check_loc.py
 npm test --prefix frontend -- --run
 npm run build --prefix frontend
 npm audit --prefix frontend
@@ -32,4 +33,5 @@ ANDROMEDA_LIVE_TEST=1 .venv/bin/pytest tests/test_live_smoke.py
   probe cache metadata in one normalized payload.
 - Node, GPU, partition, queue, job, history, scheduler, QOS, cache, command-helper, fleet-grid,
   queue-pressure, visible-user, auto-refresh, and JSON export surfaces load without runtime errors.
+- Maintained source, stylesheet, config, and documentation files stay at or below 300 LOC.
 - The UI remains readable at desktop and narrow widths.

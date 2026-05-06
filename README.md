@@ -16,6 +16,7 @@ use their own SSH config or agent, and run the dashboard locally.
 - Test fixtures covering Slurm JSON quirks, GRES variants, stale fallback, privacy behavior,
   API contracts, frontend filters, empty states, and responsive navigation.
 - CI for backend tests/lint and frontend tests/build.
+- Architecture notes and a LOC guard keep maintained files small and reviewable.
 
 ## Quick Start From A Fresh Clone
 
@@ -186,6 +187,7 @@ It requires working `ssh andromeda` auth and validates that Slurm JSON commands 
 ## Development
 
 ```bash
+python scripts/check_loc.py
 pytest
 ruff check .
 npm test --prefix frontend
@@ -196,6 +198,8 @@ npm audit --prefix frontend
 The FastAPI server serves the built frontend from `frontend/dist` when present. During
 frontend development, Vite proxies `/api` to `http://127.0.0.1:8765`.
 
+See `docs/architecture.md` for the backend/frontend module boundaries and file-size rule.
+
 ## LGTM Checklist
 
 Before merging or tagging a release:
@@ -203,6 +207,7 @@ Before merging or tagging a release:
 ```bash
 .venv/bin/pytest
 .venv/bin/ruff check .
+python scripts/check_loc.py
 npm test --prefix frontend -- --run
 npm run build --prefix frontend
 npm audit --prefix frontend

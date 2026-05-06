@@ -1,0 +1,142 @@
+.node-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.fleet-panel {
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.fleet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.inline-title {
+  margin-bottom: 0;
+}
+
+.fleet-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.fleet-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fleet-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.legend-idle,
+.fleet-cell.is-idle {
+  background: #8fb267;
+}
+
+.legend-mixed,
+.fleet-cell.is-mixed {
+  background: #d0a04c;
+}
+
+.legend-allocated,
+.fleet-cell.is-allocated {
+  background: #6f755f;
+}
+
+.legend-drain,
+.fleet-cell.is-drain {
+  background: #c87252;
+}
+
+.legend-down,
+.fleet-cell.is-down {
+  background: #9b4d46;
+}
+
+.fleet-cell.is-other {
+  background: #686d61;
+}
+
+.fleet-grid {
+  display: grid;
+  gap: 3px;
+}
+
+.fleet-cell {
+  aspect-ratio: 1;
+  min-width: 9px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 2px;
+  outline: none;
+}
+
+.fleet-cell.has-gpu {
+  box-shadow: inset 0 0 0 1px rgba(240, 239, 230, 0.45);
+}
+
+.fleet-cell:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-strong);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.summary-column {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  padding: 10px;
+}
+
+.summary-column strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.summary-column div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 5px 0;
+  border-top: 1px solid var(--border);
+}
+
+.summary-column span {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-column em {
+  color: var(--text);
+  font-style: normal;
+  font-family: var(--mono);
+}

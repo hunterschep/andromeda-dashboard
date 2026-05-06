@@ -1,0 +1,83 @@
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.segmented button {
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.segmented button:last-child {
+  border-right: 0;
+}
+
+.segmented button.active {
+  background: var(--surface-muted);
+  color: var(--accent-strong);
+}
+
+.text-button {
+  height: 30px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.text-button:hover {
+  border-color: var(--accent);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.node-filters {
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+}
+
+label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+select,
+input {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: #11130f;
+  color: var(--text);
+  padding: 0 9px;
+}
+
+.search {
+  position: relative;
+}
+
+.search svg {
+  position: absolute;
+  left: 8px;
+  bottom: 9px;
+  color: var(--muted);
+}
+
+.search input {
+  padding-left: 30px;
+}

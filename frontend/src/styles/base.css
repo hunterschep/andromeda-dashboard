@@ -1,0 +1,35 @@
+:root {
+  color-scheme: dark;
+  --bg: #10110f;
+  --surface: #181a16;
+  --surface-muted: #20231d;
+  --sidebar: #151713;
+  --text: #f0efe6;
+  --muted: #a6aa9d;
+  --border: #30342d;
+  --border-strong: #4a5145;
+  --accent: #93b86d;
+  --accent-strong: #c8e09c;
+  --warn: #d5a24a;
+  --danger: #df6b5f;
+  --mono: "SFMono-Regular", "Cascadia Mono", "Liberation Mono", monospace;
+  font-family: "Aptos", "Helvetica Neue", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+

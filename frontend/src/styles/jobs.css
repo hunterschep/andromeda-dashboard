@@ -1,0 +1,106 @@
+.two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 18px;
+}
+
+.job-list {
+  display: grid;
+  gap: 10px;
+}
+
+.runtime-panel {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.runtime-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.9fr) 86px minmax(72px, 0.7fr) 74px 60px minmax(70px, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.runtime-row strong {
+  color: var(--text);
+}
+
+.runtime-track {
+  height: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #11130f;
+}
+
+.runtime-track i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.job-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface-muted);
+}
+
+.job-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.job-heading > div {
+  display: grid;
+  gap: 3px;
+}
+
+.job-item span,
+.job-item p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(80px, 1fr));
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+}
+
+.history-box {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.history-box dl {
+  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  margin: 0;
+}
+
+.history-table {
+  margin-top: 10px;
+}

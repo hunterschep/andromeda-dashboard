@@ -1,0 +1,75 @@
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.section-subtitle {
+  margin-top: 14px;
+}
+
+.availability-matrix {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.matrix-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.9fr) repeat(5, minmax(90px, 1fr));
+  gap: 10px;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-muted);
+}
+
+.matrix-row span {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  font-size: 14px;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 700;
+  background: var(--surface-muted);
+}
+
+tbody tr:hover {
+  background: #1d2019;
+}
+
+td span {
+  display: block;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+.queue-table td:nth-child(6) {
+  min-width: 220px;
+}
+
+.node-table td:nth-child(7) {
+  min-width: 180px;
+}

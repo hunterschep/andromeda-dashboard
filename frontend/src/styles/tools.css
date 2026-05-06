@@ -1,0 +1,125 @@
+.tools-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tool-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  padding: 12px;
+}
+
+.tool-panel .section-title {
+  margin-bottom: 10px;
+}
+
+.compact-dl {
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  margin: 0 0 12px;
+}
+
+.kv-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.kv-list div {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+  background: var(--surface);
+}
+
+.kv-list span,
+.muted-line,
+.account-line span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.kv-list strong {
+  display: block;
+  margin-top: 3px;
+}
+
+.account-line {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.compact-table {
+  min-width: 560px;
+}
+
+.command-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.command-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  gap: 10px;
+  align-items: start;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  padding: 12px;
+}
+
+.command-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 4px 0 8px;
+}
+
+code {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent-strong);
+  background: #11130f;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px;
+}
+
+.copy-button {
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.copy-button:hover {
+  border-color: var(--accent);
+}
+
+.cache-block {
+  margin-top: 10px;
+}
+
+.empty-state {
+  min-height: 72px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
