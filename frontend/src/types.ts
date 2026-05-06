@@ -185,6 +185,7 @@ export type ConfigStatus = {
   config_path: string;
   config_exists: boolean;
   ssh_alias: string;
+  current_user: string;
   host: string;
   port: number;
   default_scope: string;

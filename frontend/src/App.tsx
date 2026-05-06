@@ -64,6 +64,8 @@ const emptyState: LoadState = {
   error: null
 };
 
+const NODE_PREVIEW_LIMIT = 80;
+
 export function App() {
   const [state, setState] = useState<LoadState>(emptyState);
   const [scope, setScope] = useState<"mine" | "lab" | "cluster">("mine");
@@ -76,6 +78,7 @@ export function App() {
   const [nodeGpuFilter, setNodeGpuFilter] = useState("all");
   const [nodeStateFilter, setNodeStateFilter] = useState("all");
   const [nodeQuery, setNodeQuery] = useState("");
+  const [showAllNodes, setShowAllNodes] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
   async function load(selectedScope = scope) {
@@ -111,6 +114,10 @@ export function App() {
   useEffect(() => {
     void load(scope);
   }, [scope]);
+
+  useEffect(() => {
+    setShowAllNodes(false);
+  }, [nodePartitionFilter, nodeGpuFilter, nodeStateFilter, nodeQuery]);
 
   const allCache = useMemo(() => {
     return dedupeCache([
@@ -156,6 +163,10 @@ export function App() {
       return matchesPartition && matchesGpu && matchesState && matchesQuery;
     });
   }, [nodes, nodePartitionFilter, nodeGpuFilter, nodeStateFilter, nodeQuery]);
+  const displayedNodes = showAllNodes
+    ? filteredNodes
+    : filteredNodes.slice(0, NODE_PREVIEW_LIMIT);
+  const nodeSummary = useMemo(() => summarizeNodes(filteredNodes), [filteredNodes]);
 
   const cluster = state.resources?.cluster;
   const alias = state.config?.ssh_alias ?? "andromeda";
@@ -298,7 +309,20 @@ export function App() {
         <section id="nodes" className="panel">
           <div className="section-row">
             <SectionTitle icon={<ListFilter size={18} />} title="Node Explorer" />
-            <span className="count-label">{filteredNodes.length} shown</span>
+            <div className="section-actions">
+              <span className="count-label">
+                {filteredNodes.length} matched, {displayedNodes.length} shown
+              </span>
+              {filteredNodes.length > NODE_PREVIEW_LIMIT ? (
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => setShowAllNodes((current) => !current)}
+                >
+                  {showAllNodes ? "Show first 80" : "Show all"}
+                </button>
+              ) : null}
+            </div>
           </div>
           <div className="filters node-filters">
             <FilterSelect
@@ -329,7 +353,8 @@ export function App() {
               />
             </label>
           </div>
-          <NodeTable nodes={filteredNodes} />
+          <NodeSummary summary={nodeSummary} />
+          <NodeTable nodes={displayedNodes} />
         </section>
 
         <section id="gpus" className="panel">
@@ -382,7 +407,10 @@ export function App() {
 
         <section id="jobs" className="panel two-column">
           <div>
-            <SectionTitle icon={<User size={18} />} title="My Jobs" />
+            <SectionTitle
+              icon={<User size={18} />}
+              title={`My Jobs - ${state.config?.current_user ?? "remote user"}`}
+            />
             <JobList jobs={state.myJobs?.jobs ?? []} onCopy={copyText} alias={alias} />
           </div>
           <div>
@@ -490,6 +518,45 @@ function ScopeControl({
           {item}
         </button>
       ))}
+    </div>
+  );
+}
+
+function NodeSummary({
+  summary
+}: {
+  summary: {
+    states: [string, number][];
+    gpus: [string, number][];
+    partitions: [string, number][];
+  };
+}) {
+  return (
+    <div className="node-summary" aria-label="Node summary">
+      <SummaryColumn title="States" rows={summary.states} />
+      <SummaryColumn title="GPU Types" rows={summary.gpus} />
+      <SummaryColumn title="Partitions" rows={summary.partitions} />
+    </div>
+  );
+}
+
+function SummaryColumn({ title, rows }: { title: string; rows: [string, number][] }) {
+  return (
+    <div className="summary-column">
+      <strong>{title}</strong>
+      {rows.length ? (
+        rows.slice(0, 6).map(([label, count]) => (
+          <div key={label}>
+            <span>{label}</span>
+            <em>{count}</em>
+          </div>
+        ))
+      ) : (
+        <div>
+          <span>none</span>
+          <em>0</em>
+        </div>
+      )}
     </div>
   );
 }
@@ -924,7 +991,6 @@ function gpuInventoryText(node: NodeResource): string {
 
 function secondsText(value: number | null): string {
   if (value === null || value === undefined) return "n/a";
-  if (value > 1000) return `${(value / 1000000).toFixed(2)}s`;
   return `${value.toFixed(2)}s`;
 }
 
@@ -1011,4 +1077,26 @@ function buildCommands(alias: string): ToolCommand[] {
       description: "Review per-user job, submission, CPU, GPU, and memory caps."
     }
   ];
+}
+
+function summarizeNodes(nodes: NodeResource[]) {
+  const states = new Map<string, number>();
+  const gpus = new Map<string, number>();
+  const partitions = new Map<string, number>();
+  for (const node of nodes) {
+    states.set(node.state, (states.get(node.state) ?? 0) + 1);
+    for (const gpu of node.gpu_types.length ? node.gpu_types : ["cpu-only"]) {
+      gpus.set(gpu, (gpus.get(gpu) ?? 0) + 1);
+    }
+    for (const partition of node.partitions.length ? node.partitions : ["unassigned"]) {
+      partitions.set(partition, (partitions.get(partition) ?? 0) + 1);
+    }
+  }
+  const byCount = (left: [string, number], right: [string, number]) =>
+    right[1] - left[1] || left[0].localeCompare(right[0]);
+  return {
+    states: Array.from(states.entries()).sort(byCount),
+    gpus: Array.from(gpus.entries()).sort(byCount),
+    partitions: Array.from(partitions.entries()).sort(byCount)
+  };
 }

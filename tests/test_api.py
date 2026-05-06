@@ -9,6 +9,7 @@ from andromeda_dashboard.api import create_app
 from andromeda_dashboard.cache import SQLiteCache
 from andromeda_dashboard.collector import (
     ASSOC,
+    IDENTITY,
     NODES,
     PARTITIONS,
     QOS,
@@ -43,6 +44,7 @@ def test_api_contracts(load_json, load_text, tmp_path):
     )
     outputs = {
         NODES.command: json.dumps(load_json("nodes.json")),
+        IDENTITY.command: "hunterschep",
         PARTITIONS.command: json.dumps(load_json("partitions.json")),
         SINFO.command: json.dumps(load_json("sinfo.json")),
         QUEUE.command: json.dumps(load_json("queue.json")),
@@ -59,7 +61,9 @@ def test_api_contracts(load_json, load_text, tmp_path):
     client = TestClient(create_app(settings, collector))
 
     assert client.get("/api/health").json()["status"] == "ok"
-    assert client.get("/api/config/status").json()["ssh_alias"] == "andromeda"
+    status = client.get("/api/config/status").json()
+    assert status["ssh_alias"] == "andromeda"
+    assert status["current_user"] == "hunterschep"
 
     resources = client.get("/api/resources").json()
     assert set(resources) >= {"nodes", "gpu_pools", "partitions", "cluster", "cache"}

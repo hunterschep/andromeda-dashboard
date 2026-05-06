@@ -40,6 +40,7 @@ PENDING_REASON_LABELS: dict[str, str] = {
 
 
 def as_list(value: Any) -> list[Any]:
+    value = unwrap_slurm_value(value)
     if value is None:
         return []
     if isinstance(value, list):
@@ -61,6 +62,7 @@ def pick(mapping: dict[str, Any], *keys: str, default: Any = None) -> Any:
 
 
 def parse_int(value: Any, default: int = 0) -> int:
+    value = unwrap_slurm_value(value)
     if value is None or value == "":
         return default
     if isinstance(value, bool):
@@ -74,6 +76,7 @@ def parse_int(value: Any, default: int = 0) -> int:
 
 
 def parse_float(value: Any) -> float | None:
+    value = unwrap_slurm_value(value)
     if value is None or value == "":
         return None
     if isinstance(value, int | float):
@@ -83,6 +86,7 @@ def parse_float(value: Any) -> float | None:
 
 
 def parse_memory_mb(value: Any) -> int | None:
+    value = unwrap_slurm_value(value)
     if value is None or value == "":
         return None
     if isinstance(value, int | float):
@@ -100,6 +104,10 @@ def parse_memory_mb(value: Any) -> int | None:
 
 
 def parse_duration_seconds(value: Any) -> int | None:
+    if isinstance(value, dict) and "number" in value:
+        value = unwrap_slurm_value(value)
+        return int(value) * 60 if value is not None else None
+    value = unwrap_slurm_value(value)
     if value is None or value == "" or value in {"UNLIMITED", "Partition_Limit", "N/A"}:
         return None
     if isinstance(value, int | float):
@@ -123,6 +131,11 @@ def parse_duration_seconds(value: Any) -> int | None:
 
 
 def parse_datetime(value: Any) -> datetime | None:
+    value = unwrap_slurm_value(value)
+    if isinstance(value, list):
+        value = value[0] if value else None
+    if isinstance(value, dict):
+        return None
     if value is None or value in {"", 0, "0", "Unknown", "N/A", "(null)"}:
         return None
     if isinstance(value, datetime):
@@ -143,6 +156,7 @@ def parse_datetime(value: Any) -> datetime | None:
 
 
 def parse_tres(value: Any) -> dict[str, str]:
+    value = unwrap_slurm_value(value)
     if value is None or value == "":
         return {}
     if isinstance(value, dict):
@@ -277,6 +291,7 @@ def parse_gpu_inventory(
 
 
 def normalize_node_state(value: Any) -> tuple[str, list[str]]:
+    value = unwrap_slurm_value(value)
     raw = value
     if isinstance(value, list):
         raw = "+".join(str(item) for item in value)
@@ -286,6 +301,32 @@ def normalize_node_state(value: Any) -> tuple[str, list[str]]:
     parts = [part for part in re.split(r"[+~# ]+", text) if part]
     state = parts[0] if parts else "UNKNOWN"
     return state, parts[1:]
+
+
+def unwrap_slurm_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        if value.get("infinite") is True:
+            return None
+        if "number" in value:
+            if value.get("set") is False:
+                return None
+            return value.get("number")
+        if "current" in value:
+            return value.get("current")
+        if "name" in value and len(value) == 1:
+            return value.get("name")
+    return value
+
+
+def parse_exit_code(value: Any) -> str | None:
+    if value is None or value == "":
+        return None
+    if isinstance(value, dict):
+        return_code = parse_int(value.get("return_code"), default=0)
+        signal = value.get("signal", {})
+        signal_code = parse_int(signal.get("id") if isinstance(signal, dict) else signal, default=0)
+        return f"{return_code}:{signal_code}"
+    return str(value)
 
 
 def normalize_nodes(raw: dict[str, Any]) -> list[NodeResource]:
@@ -541,7 +582,7 @@ def normalize_queue(
             anonymized = True
 
         job_id = str(pick(item, "job_id", "jobid", "id", default="unknown"))
-        state = str(pick(item, "job_state", "state", default="UNKNOWN")).upper()
+        state, _ = normalize_node_state(pick(item, "job_state", "state", default="UNKNOWN"))
         state_reason = pick(item, "state_reason", "reason", default=None)
         reason_key = str(state_reason or "")
         gpus = parse_gpu_requests(
@@ -604,16 +645,25 @@ def normalize_history(raw: dict[str, Any], *, days: int, debug: bool = False) ->
         if not isinstance(item, dict):
             continue
         job_id = str(pick(item, "job_id", "jobid", "id", default="unknown"))
-        submit_time = parse_datetime(pick(item, "submit_time", "submit", default=None))
-        start_time = parse_datetime(pick(item, "start_time", "start", default=None))
-        end_time = parse_datetime(pick(item, "end_time", "end", default=None))
+        time_info = item.get("time") if isinstance(item.get("time"), dict) else {}
+        submit_time = parse_datetime(
+            pick(item, "submit_time", "submit", default=None) or time_info.get("submission")
+        )
+        start_time = parse_datetime(
+            pick(item, "start_time", "start", default=None) or time_info.get("start")
+        )
+        end_time = parse_datetime(
+            pick(item, "end_time", "end", default=None) or time_info.get("end")
+        )
         wait_seconds = (
             int((start_time - submit_time).total_seconds()) if submit_time and start_time else None
         )
         runtime_seconds = (
             int((end_time - start_time).total_seconds())
             if start_time and end_time
-            else parse_duration_seconds(pick(item, "elapsed", "elapsed_raw", default=None))
+            else parse_duration_seconds(
+                pick(item, "elapsed", "elapsed_raw", default=None) or time_info.get("elapsed")
+            )
         )
         job_name = pick(item, "name", "job_name", default=None)
         if not debug and pick(item, "submit_line", default=None):
@@ -625,8 +675,8 @@ def normalize_history(raw: dict[str, Any], *, days: int, debug: bool = False) ->
                 user=pick(item, "user", "user_name", default=None),
                 account=pick(item, "account", default=None),
                 partition=pick(item, "partition", default=None),
-                state=str(pick(item, "state", "job_state", default="UNKNOWN")),
-                exit_code=pick(item, "exit_code", "exitcode", default=None),
+                state=normalize_node_state(pick(item, "state", "job_state", default="UNKNOWN"))[0],
+                exit_code=parse_exit_code(pick(item, "exit_code", "exitcode", default=None)),
                 submit_time=submit_time,
                 start_time=start_time,
                 end_time=end_time,
@@ -710,12 +760,12 @@ def parse_sdiag(text: str) -> SchedulerHealth:
         key, value = line.split(":", 1)
         raw[key.strip()] = value.strip()
     return SchedulerHealth(
-        last_cycle_seconds=parse_float(raw.get("Last cycle")),
-        mean_cycle_seconds=parse_float(raw.get("Mean cycle")),
+        last_cycle_seconds=_sdiag_microseconds_to_seconds(raw.get("Last cycle")),
+        mean_cycle_seconds=_sdiag_microseconds_to_seconds(raw.get("Mean cycle")),
         backfill_last_depth=parse_int(raw.get("bf last depth"), default=0)
         if raw.get("bf last depth")
         else None,
-        backfill_last_cycle_seconds=parse_float(raw.get("bf last cycle")),
+        backfill_last_cycle_seconds=_sdiag_microseconds_to_seconds(raw.get("bf last cycle")),
         queue_depth=parse_int(raw.get("Jobs submitted"), default=0)
         if raw.get("Jobs submitted")
         else None,
@@ -734,3 +784,10 @@ def parse_sprio_weights(text: str) -> dict[str, float]:
             names = names[-len(numbers) :]
         return {name: number for name, number in zip(names, numbers, strict=False)}
     return {}
+
+
+def _sdiag_microseconds_to_seconds(value: str | None) -> float | None:
+    parsed = parse_float(value)
+    if parsed is None:
+        return None
+    return parsed / 1_000_000

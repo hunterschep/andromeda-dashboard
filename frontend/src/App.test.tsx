@@ -4,7 +4,46 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 
 const resources = {
-  nodes: [],
+  nodes: [
+    {
+      name: "cpu001",
+      state: "IDLE",
+      state_flags: [],
+      partitions: ["short", "medium"],
+      features: ["rome", "large-mem"],
+      cpus_total: 44,
+      cpus_allocated: 0,
+      cpus_idle: 44,
+      memory_total_mb: 184320,
+      memory_free_mb: 184320,
+      gres: [],
+      gpu_total: 0,
+      gpu_used: 0,
+      gpu_free: 0,
+      gpu_types: [],
+      reason: null,
+      is_available: true
+    },
+    {
+      name: "gpu001",
+      state: "MIXED",
+      state_flags: [],
+      partitions: ["short"],
+      features: ["a100"],
+      cpus_total: 64,
+      cpus_allocated: 32,
+      cpus_idle: 32,
+      memory_total_mb: 512000,
+      memory_free_mb: 250000,
+      gres: [{ type: "a100", total: 4, used: 2, free: 2 }],
+      gpu_total: 4,
+      gpu_used: 2,
+      gpu_free: 2,
+      gpu_types: ["a100"],
+      reason: null,
+      is_available: true
+    }
+  ],
   gpu_pools: [
     {
       type: "a100",
@@ -148,8 +187,35 @@ const insights = {
       details: ["a100: 2 usable of 4"]
     }
   ],
-  scheduler: null,
-  cache: []
+  scheduler: {
+    last_cycle_seconds: 0.25,
+    mean_cycle_seconds: 1.5,
+    backfill_last_depth: 120,
+    backfill_last_cycle_seconds: 4,
+    queue_depth: 55,
+    priority_weights: { fairshare: 10000, qos: 10000, tres: 5000 },
+    raw: {}
+  },
+  account_limits: {
+    user: "hunterschep",
+    account: "lab",
+    qos: [
+      {
+        name: "normal",
+        max_jobs_per_user: 2000,
+        max_submit_per_user: 3000,
+        max_tres_per_user: { cpu: "3600" }
+      },
+      {
+        name: "int",
+        max_jobs_per_user: 2,
+        max_submit_per_user: null,
+        max_tres_per_user: { cpu: "16", "gres/gpu": "1", mem: "64G" }
+      }
+    ],
+    raw_rows: []
+  },
+  cache: [{ key: "scheduler", captured_at: null, ttl_seconds: 60, is_stale: false, errors: [] }]
 };
 
 function mockFetch(overrides: Record<string, unknown> = {}) {
@@ -158,6 +224,7 @@ function mockFetch(overrides: Record<string, unknown> = {}) {
       config_path: "/tmp/config.toml",
       config_exists: true,
       ssh_alias: "andromeda",
+      current_user: "scheppat",
       host: "127.0.0.1",
       port: 8765,
       default_scope: "mine",
@@ -200,7 +267,13 @@ describe("App", () => {
     expect(await screen.findByText("Compute Dashboard")).toBeInTheDocument();
     expect(screen.getByText(/Showing cached data for nodes/)).toBeInTheDocument();
     expect(screen.getAllByText("a100").length).toBeGreaterThan(0);
+    expect(screen.getByText("Node Explorer")).toBeInTheDocument();
+    expect(screen.getAllByText("gpu001").length).toBeGreaterThan(0);
     expect(screen.getByText("Waiting for requested CPUs, memory, GPUs, or nodes to free up")).toBeInTheDocument();
+    expect(screen.getByText("Power Tools")).toBeInTheDocument();
+    expect(screen.getByText("Identity Probe")).toBeInTheDocument();
+    expect(screen.getByText("Cache Diagnostics")).toBeInTheDocument();
+    expect(screen.getByText("normal")).toBeInTheDocument();
   });
 
   it("filters jobs by partition and state", async () => {
@@ -208,11 +281,11 @@ describe("App", () => {
     render(<App />);
     await screen.findByText("train-a100");
 
-    await user.selectOptions(screen.getByLabelText("Partition"), "medium");
+    await user.selectOptions(screen.getAllByLabelText("Partition")[1], "medium");
     expect(screen.queryByText("train-a100")).not.toBeInTheDocument();
     expect(screen.getByText("cpu-grid")).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText("State"), "RUNNING");
+    await user.selectOptions(screen.getAllByLabelText("State")[1], "RUNNING");
     expect(screen.getByText("No jobs match the current filters.")).toBeInTheDocument();
   });
 
@@ -221,7 +294,7 @@ describe("App", () => {
       "/api/resources": { ...resources, gpu_pools: [], partitions: [], cache: [] },
       "/api/queue?scope=mine": { ...queue, jobs: [], running: 0, pending: 0 },
       "/api/jobs/mine": { ...queue, jobs: [], running: 0, pending: 0 },
-      "/api/insights": { ...insights, insights: [] }
+      "/api/insights": { ...insights, insights: [], scheduler: null, account_limits: null }
     });
 
     render(<App />);

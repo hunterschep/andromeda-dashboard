@@ -240,6 +240,7 @@ class ConfigStatus(BaseModel):
     config_path: str
     config_exists: bool
     ssh_alias: str
+    current_user: str
     host: str
     port: int
     default_scope: str

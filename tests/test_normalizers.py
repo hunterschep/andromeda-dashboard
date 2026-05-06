@@ -116,9 +116,95 @@ def test_history_and_text_parsers(load_json, load_text):
     assert assoc.account == "lab"
 
     scheduler = parse_sdiag(load_text("sdiag.txt"))
+    assert scheduler.last_cycle_seconds == 0.25
+    assert scheduler.mean_cycle_seconds == 1.5
     assert scheduler.backfill_last_depth == 120
     assert scheduler.queue_depth == 55
 
     weights = parse_sprio_weights(load_text("sprio.txt"))
     assert weights["fairshare"] == 10000
     assert weights["tres"] == 5000
+
+
+def test_live_slurm_nested_values_are_normalized():
+    queue = normalize_queue(
+        {
+            "jobs": [
+                {
+                    "job_id": 2290647,
+                    "name": "Jupyter",
+                    "user_name": "someuser",
+                    "account": "lab",
+                    "partition": "long",
+                    "job_state": ["RUNNING"],
+                    "state_reason": "None",
+                    "cpus": {"infinite": False, "number": 62, "set": True},
+                    "memory_per_node": {"infinite": False, "number": 59392, "set": True},
+                    "tres_req_str": "cpu=62,mem=58G,node=1",
+                    "start_time": {"infinite": False, "number": 1775787201, "set": True},
+                    "submit_time": {"infinite": False, "number": 1775787199, "set": True},
+                    "end_time": {"infinite": False, "number": 1778379201, "set": True},
+                    "time_limit": {"infinite": False, "number": 2880, "set": True},
+                    "priority": {"infinite": False, "number": 863688, "set": True},
+                    "nodes": "cht006",
+                }
+            ]
+        },
+        {"jobs": []},
+        scope="cluster",
+        current_user="someuser",
+        lab_users=[],
+        debug=True,
+    )
+    assert queue.jobs[0].state == "RUNNING"
+    assert queue.jobs[0].cpus == 62
+    assert queue.jobs[0].memory_mb == 59392
+    assert queue.jobs[0].time_limit_seconds == 172800
+    assert queue.jobs[0].start_time is not None
+
+    history = normalize_history(
+        {
+            "jobs": [
+                {
+                    "job_id": 2419328,
+                    "state": {"current": ["COMPLETED"], "reason": "None"},
+                    "exit_code": {
+                        "return_code": {"infinite": False, "number": 0, "set": True},
+                        "signal": {
+                            "id": {"infinite": False, "number": 0, "set": False},
+                            "name": "",
+                        },
+                    },
+                    "submit_time": {"infinite": False, "number": 1775787199, "set": True},
+                    "start_time": {"infinite": False, "number": 1775787201, "set": True},
+                    "end_time": {"infinite": False, "number": 1775787301, "set": True},
+                }
+            ]
+        },
+        days=7,
+    )
+    assert history.jobs[0].state == "COMPLETED"
+    assert history.jobs[0].exit_code == "0:0"
+    assert history.jobs[0].wait_seconds == 2
+
+    timed_history = normalize_history(
+        {
+            "jobs": [
+                {
+                    "job_id": 2419328,
+                    "user": "scheppat",
+                    "state": {"current": ["COMPLETED"], "reason": "None"},
+                    "time": {
+                        "elapsed": 22046,
+                        "end": 1777542222,
+                        "start": 1777520176,
+                        "submission": 1777517681,
+                    },
+                }
+            ]
+        },
+        days=7,
+    )
+    assert timed_history.jobs[0].wait_seconds == 2495
+    assert timed_history.jobs[0].runtime_seconds == 22046
+    assert timed_history.median_wait_seconds == 2495

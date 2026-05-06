@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from andromeda_dashboard.cache import SQLiteCache
 from andromeda_dashboard.collector import (
     ASSOC,
+    IDENTITY,
     NODES,
     PARTITIONS,
     QOS,
@@ -53,6 +54,7 @@ def make_settings(tmp_path):
 def outputs(load_json, load_text):
     return {
         NODES.command: json.dumps(load_json("nodes.json")),
+        IDENTITY.command: "hunterschep",
         PARTITIONS.command: json.dumps(load_json("partitions.json")),
         SINFO.command: json.dumps(load_json("sinfo.json")),
         QUEUE.command: json.dumps(load_json("queue.json")),
@@ -152,3 +154,21 @@ def test_auth_failure_is_reported_without_password_fallback(load_json, load_text
     assert queue.jobs == []
     assert queue.cache[0].is_stale is True
     assert "Permission denied" in queue.cache[0].errors[0]
+
+
+def test_remote_identity_drives_mine_scope(load_json, load_text, tmp_path):
+    settings = Settings(
+        cache={"path": str(tmp_path / "identity.sqlite3")},
+        lab={"users": ["labmate"]},
+    )
+    raw_outputs = outputs(load_json, load_text)
+    raw_outputs[IDENTITY.command] = "labmate"
+    collector = SlurmCollector(
+        settings,
+        runner=FakeRunner(raw_outputs),
+        cache=SQLiteCache(settings.cache_path),
+    )
+
+    assert collector.config_status().current_user == "labmate"
+    queue = collector.get_queue(scope="mine")
+    assert [job.job_id for job in queue.jobs] == ["102"]

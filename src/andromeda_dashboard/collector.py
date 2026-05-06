@@ -42,6 +42,7 @@ class CommandSpec:
 NODES = CommandSpec("nodes", "scontrol show nodes --json", 30)
 PARTITIONS = CommandSpec("partitions", "scontrol show partition --json", 3600)
 SINFO = CommandSpec("sinfo", "sinfo --json", 30)
+IDENTITY = CommandSpec("identity", 'printf "%s" "$USER"', 3600, json_output=False)
 QUEUE = CommandSpec("queue", "squeue --json", 30)
 STARTS = CommandSpec("queue-starts", "squeue --start --json", 30)
 SCHEDULER = CommandSpec("scheduler", "sdiag", 60, json_output=False)
@@ -114,6 +115,7 @@ class SlurmCollector:
             config_path=str(self.settings.config_path),
             config_exists=self.settings.config_path.exists(),
             ssh_alias=self.settings.ssh.alias,
+            current_user=self.current_user(),
             host=self.settings.server.host,
             port=self.settings.server.port,
             default_scope=self.settings.privacy.default_scope,
@@ -121,6 +123,13 @@ class SlurmCollector:
             cache_path=str(self.settings.cache_path),
             debug=self.settings.privacy.debug,
         )
+
+    def current_user(self) -> str:
+        if self.settings.slurm.user:
+            return self.settings.slurm.user
+        identity = self._run(IDENTITY)
+        remote_user = str(identity.payload or "").strip().splitlines()[0:1]
+        return remote_user[0] if remote_user and remote_user[0] else self.settings.current_user
 
     def get_resources(self) -> ResourceResponse:
         nodes_raw = self._run(NODES)
@@ -154,7 +163,7 @@ class SlurmCollector:
             queue_raw.payload if isinstance(queue_raw.payload, dict) else {},
             starts_raw.payload if isinstance(starts_raw.payload, dict) else {},
             scope=scope,
-            current_user=self.settings.current_user,
+            current_user=self.current_user(),
             lab_users=self.settings.lab.users,
             debug=self.settings.privacy.debug,
         )

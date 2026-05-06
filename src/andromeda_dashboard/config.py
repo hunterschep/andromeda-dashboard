@@ -122,6 +122,10 @@ path = "~/.cache/andromeda-dashboard/cache.sqlite3"
 
 [history]
 default_days = 7
+
+[slurm]
+# Leave unset to auto-detect the remote Andromeda username.
+# user = "your_andromeda_username"
 """
     config_path.write_text(text, encoding="utf-8")
     return config_path

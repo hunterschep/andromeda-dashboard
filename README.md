@@ -6,7 +6,18 @@ The app runs on `127.0.0.1` and collects data through the configured OpenSSH ali
 `andromeda`. It does not store passwords or SSH keys. Each lab member can clone the repo,
 use their own SSH config or agent, and run the dashboard locally.
 
-## Quick Start
+## What It Includes
+
+- FastAPI backend with normalized Slurm models and local SQLite stale-cache fallback.
+- React/Vite dashboard for resources, nodes, GPU pools, partitions, queue, jobs, history,
+  insights, scheduler health, QOS/account limits, command helpers, cache diagnostics, and
+  JSON snapshot export.
+- CLI for config setup, SSH validation, read-only probe runs, and serving the app.
+- Test fixtures covering Slurm JSON quirks, GRES variants, stale fallback, privacy behavior,
+  API contracts, frontend filters, empty states, and responsive navigation.
+- CI for backend tests/lint and frontend tests/build.
+
+## Quick Start From A Fresh Clone
 
 ```bash
 python3 -m venv .venv
@@ -27,6 +38,15 @@ npm run dev --prefix frontend
 
 Open `http://127.0.0.1:5173`.
 
+For the built single-server path:
+
+```bash
+npm run build --prefix frontend
+andromeda-dashboard serve
+```
+
+Open `http://127.0.0.1:8765`.
+
 ## SSH Requirements
 
 The dashboard only runs read-only Slurm commands through:
@@ -37,6 +57,19 @@ ssh andromeda '<slurm command>'
 
 Configure `~/.ssh/config` or your SSH agent so that `ssh andromeda` succeeds with key-based
 auth. Password storage is intentionally unsupported.
+
+Minimal SSH config shape:
+
+```sshconfig
+Host andromeda
+  HostName <andromeda-login-host>
+  User YOUR_BC_USERNAME
+  IdentityFile ~/.ssh/YOUR_KEY
+  IdentitiesOnly yes
+```
+
+The app uses `BatchMode=yes` and `PasswordAuthentication=no`. If key or VPN auth fails, fix
+local SSH access first; the app will not fall back to password prompts.
 
 ## Configuration
 
@@ -68,7 +101,17 @@ users = ["alice", "bob"]
 
 [cache]
 path = "~/.cache/andromeda-dashboard/cache.sqlite3"
+
+[history]
+default_days = 7
+
+[slurm]
+# Optional. Leave unset to auto-detect the remote Andromeda username.
+# user = "your_andromeda_username"
 ```
+
+The dashboard auto-detects the remote Slurm username through the configured SSH alias. Set
+`slurm.user` only if your SSH environment reports a different value than Slurm uses.
 
 ## API
 
@@ -90,6 +133,28 @@ The collector uses read-only CLI probes over SSH: `scontrol show nodes --json`,
 `scontrol show partition --json`, `sinfo --json`, `squeue --json`,
 `squeue --start --json`, `sacct --json`, `sacctmgr show assoc`,
 `sacctmgr show qos`, `sdiag`, and `sprio -w`.
+
+Cache TTLs:
+
+- Live queue/resources: 30 seconds.
+- Scheduler health: 60 seconds.
+- Accounting history: 15 minutes.
+- Partition/static metadata and account limits: 1 hour.
+
+## Power User Dashboard Tools
+
+- Node explorer with partition, state, GPU type, feature/name filters, free CPU/memory/GPU,
+  grouped summaries, a default first-80 table view, and drain/down reasons.
+- Queue explorer with mine/lab/cluster privacy scopes, partition/GPU/state/reason/search
+  filters, Slurm start estimates, dependencies, node placement, and pending reason labels.
+- My Jobs panel with elapsed/limit/request/node details and one-click copy for
+  `scontrol show job -dd`.
+- Scheduler panel with `sdiag` cycle/backfill values and `sprio -w` priority weights.
+- Account limits panel with visible `sacctmgr` association and QOS limits.
+- Read-only command helpers for identity probes, quotas, node/queue JSON, start estimates,
+  accounting history, scheduler health, and QOS checks.
+- Cache diagnostics showing freshness, TTL, capture time, and last command error.
+- JSON snapshot export for bug reports, lab discussion, or offline inspection.
 
 ## Privacy Defaults
 
@@ -113,9 +178,32 @@ It requires working `ssh andromeda` auth and validates that Slurm JSON commands 
 
 ```bash
 pytest
+ruff check .
 npm test --prefix frontend
 npm run build --prefix frontend
+npm audit --prefix frontend
 ```
 
 The FastAPI server serves the built frontend from `frontend/dist` when present. During
 frontend development, Vite proxies `/api` to `http://127.0.0.1:8765`.
+
+## LGTM Checklist
+
+Before merging or tagging a release:
+
+```bash
+.venv/bin/pytest
+.venv/bin/ruff check .
+npm test --prefix frontend -- --run
+npm run build --prefix frontend
+npm audit --prefix frontend
+```
+
+Optional live validation:
+
+```bash
+ANDROMEDA_LIVE_TEST=1 .venv/bin/pytest tests/test_live_smoke.py
+```
+
+Release is LGTM when the checks pass, `git status --short` is clean, the dashboard loads
+locally, and no command path stores credentials or writes to Andromeda.
