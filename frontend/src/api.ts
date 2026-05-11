@@ -3,16 +3,30 @@ import type {
   DashboardSnapshot,
   HistoryResponse,
   InsightsResponse,
+  QueuePredictionResponse,
   QueueResponse,
-  ResourceResponse
+  ResourceResponse,
+  StorageResponse,
+  TelemetryResponse
 } from "./types";
 
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(path, { headers: { Accept: "application/json" } });
   if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    if (looksLikeMissingBackend(response.status, body)) {
+      throw new Error(
+        `Backend API is not reachable. Start it with ".venv/bin/andromeda-dashboard serve" from the repo root, then refresh.`
+      );
+    }
     throw new Error(`${path} returned ${response.status}`);
   }
   return (await response.json()) as T;
+}
+
+function looksLikeMissingBackend(status: number, body: string): boolean {
+  const text = body.toLowerCase();
+  return status === 500 && (text.includes("proxy") || text.includes("econnrefused") || text.includes("127.0.0.1:8765"));
 }
 
 export const api = {
@@ -22,6 +36,11 @@ export const api = {
   myJobs: () => getJson<QueueResponse>("/api/jobs/mine"),
   history: (days: 7 | 30) => getJson<HistoryResponse>(`/api/history?days=${days}`),
   insights: () => getJson<InsightsResponse>("/api/insights"),
+  telemetry: (scope: "mine" | "lab" | "cluster", hours = 24) =>
+    getJson<TelemetryResponse>(`/api/telemetry?scope=${scope}&hours=${hours}`),
+  prediction: (scope: "mine" | "lab" | "cluster", hours = 24) =>
+    getJson<QueuePredictionResponse>(`/api/prediction?scope=${scope}&hours=${hours}`),
+  storage: () => getJson<StorageResponse>("/api/storage"),
   snapshot: (scope: "mine" | "lab" | "cluster", days: 7 | 30) =>
     getJson<DashboardSnapshot>(`/api/snapshot?scope=${scope}&days=${days}`)
 };

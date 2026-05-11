@@ -1,0 +1,121 @@
+.active-burn-panel {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.active-burn-head,
+.active-burn-title {
+  display: flex;
+  align-items: center;
+}
+
+.active-burn-head {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.active-burn-head .section-title {
+  margin-bottom: 0;
+}
+
+.active-burn-head > span,
+.active-burn-panel > p,
+.active-burn-title span,
+.active-burn-row p,
+.active-burn-row em {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.active-burn-head > span,
+.active-burn-summary dd {
+  font-family: var(--mono);
+}
+
+.active-burn-panel > p,
+.active-burn-row p,
+.active-burn-row em {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.active-burn-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.active-burn-summary dd {
+  overflow: hidden;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active-burn-list {
+  display: grid;
+  gap: 8px;
+}
+
+.active-burn-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.active-burn-row.tone-gpu {
+  border-left-color: var(--warn);
+}
+
+.active-burn-row.tone-urgent {
+  border-left-color: var(--danger);
+}
+
+.active-burn-title {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.active-burn-title > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.active-burn-title strong,
+.active-burn-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active-burn-track {
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  background: #11130f;
+}
+
+.active-burn-track span {
+  display: block;
+  height: 100%;
+  background: var(--warn);
+}
+
+.tone-urgent .active-burn-track span {
+  background: var(--danger);
+}
+
+.active-burn-row em {
+  font-style: normal;
+}

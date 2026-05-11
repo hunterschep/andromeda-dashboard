@@ -63,7 +63,17 @@
 
 main {
   min-width: 0;
+  overflow-x: hidden;
   padding: 22px 28px 36px;
+}
+
+.section-loading {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
 }
 
 .topbar {
@@ -126,7 +136,9 @@ p {
 }
 
 h1 {
-  font-size: 28px;
+  font-size: 32px;
+  font-weight: 720;
+  letter-spacing: 0;
   line-height: 1.15;
 }
 
@@ -225,6 +237,23 @@ h1 {
 .panel {
   margin-top: 12px;
   padding: 16px;
+}
+
+.executive-ui main section.panel > p,
+.executive-ui main article > p,
+.executive-ui main [class$="-panel"] > p,
+.executive-ui main [class$="-row"] > p,
+.executive-ui main [class$="-item"] > p {
+  display: none;
+}
+
+.executive-ui .empty-state {
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 7px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
 }
 
 .section-title,

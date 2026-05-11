@@ -1,0 +1,104 @@
+.wait-doctor-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.wait-doctor-head,
+.wait-doctor-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wait-doctor-head .section-title {
+  margin-bottom: 0;
+}
+
+.wait-doctor-head > span,
+.wait-doctor-title span,
+.wait-doctor-row p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.wait-doctor-head > span {
+  font-family: var(--mono);
+}
+
+.wait-doctor-list {
+  display: grid;
+  gap: 8px;
+}
+
+.wait-doctor-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.wait-doctor-row.tone-watch {
+  border-left-color: var(--warn);
+}
+
+.wait-doctor-row.tone-blocked {
+  border-left-color: var(--danger);
+}
+
+.wait-doctor-title > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wait-doctor-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wait-doctor-row .icon-button {
+  height: 30px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+.wait-doctor-row > strong {
+  font-size: 13px;
+}
+
+.wait-doctor-row dl {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.wait-doctor-row dd {
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wait-doctor-row .severity-warning dd {
+  color: var(--warn);
+}
+
+.wait-doctor-row .severity-critical dd {
+  color: var(--danger);
+}
+
+.wait-doctor-row p {
+  margin: 0;
+  line-height: 1.45;
+}

@@ -1,0 +1,101 @@
+.experiment-continuity-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.experiment-continuity-head,
+.experiment-continuity-head > div,
+.experiment-continuity-title {
+  display: flex;
+  align-items: center;
+}
+
+.experiment-continuity-head,
+.experiment-continuity-title {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.experiment-continuity-head .section-title {
+  margin-bottom: 0;
+}
+
+.experiment-continuity-head > div {
+  gap: 8px;
+}
+
+.experiment-continuity-head span,
+.experiment-continuity-panel > p,
+.experiment-continuity-title span,
+.experiment-continuity-row p,
+.experiment-continuity-row em,
+.experiment-continuity-evidence span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.experiment-continuity-panel > p,
+.experiment-continuity-row p,
+.experiment-continuity-row em {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.experiment-continuity-list {
+  display: grid;
+  gap: 8px;
+}
+
+.experiment-continuity-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.experiment-continuity-row.tone-watch {
+  border-left-color: var(--warn);
+}
+
+.experiment-continuity-row.tone-risk {
+  border-left-color: var(--danger);
+}
+
+.experiment-continuity-title > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.experiment-continuity-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.experiment-continuity-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.experiment-continuity-evidence span {
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-muted);
+  font-family: var(--mono);
+}
+
+.experiment-continuity-row em {
+  font-style: normal;
+}

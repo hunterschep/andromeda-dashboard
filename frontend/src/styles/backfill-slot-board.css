@@ -1,0 +1,90 @@
+.backfill-slot-board {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.backfill-slot-head,
+.backfill-slot-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.backfill-slot-head .section-title {
+  margin-bottom: 0;
+}
+
+.backfill-slot-head > span,
+.backfill-slot-board > p,
+.backfill-slot-title span,
+.backfill-slot-row p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.backfill-slot-board > p,
+.backfill-slot-row p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.backfill-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 8px;
+}
+
+.backfill-slot-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.backfill-slot-row.tone-tight {
+  border-left-color: var(--warn);
+}
+
+.backfill-slot-row.tone-blocked {
+  border-left-color: var(--danger);
+}
+
+.backfill-slot-title > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.backfill-slot-title strong,
+.backfill-slot-title span,
+.backfill-slot-row dd {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.backfill-slot-row dl {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.backfill-slot-row dd {
+  color: var(--text);
+  font-family: var(--mono);
+}
+
+@media (max-width: 760px) {
+  .backfill-slot-row dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

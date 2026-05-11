@@ -15,7 +15,9 @@ from andromeda_dashboard.collector import (
     SCHEDULER,
     SINFO,
     SPRIO,
+    SPRIO_JOBS,
     STARTS,
+    STORAGE,
     SlurmCollector,
 )
 from andromeda_dashboard.config import Settings
@@ -63,6 +65,8 @@ def outputs(load_json, load_text):
         ASSOC.command: load_text("assoc.txt"),
         SCHEDULER.command: load_text("sdiag.txt"),
         SPRIO.command: load_text("sprio.txt"),
+        SPRIO_JOBS.command: load_text("sprio.txt"),
+        STORAGE.command: load_text("storage.txt"),
         "sacct --json -S now-7days -n -X": json.dumps(load_json("history.json")),
     }
 
@@ -85,6 +89,7 @@ def test_collector_resources_and_insights(load_json, load_text, tmp_path):
     assert any(insight.id == "gpu-availability" for insight in insights.insights)
     assert insights.account_limits is not None
     assert insights.scheduler is not None
+    assert insights.priority_jobs[0].dominant_factor == "fairshare"
 
 
 def test_stale_cache_fallback_for_timeout(load_json, load_text, tmp_path):
@@ -172,3 +177,39 @@ def test_remote_identity_drives_mine_scope(load_json, load_text, tmp_path):
     assert collector.config_status().current_user == "labmate"
     queue = collector.get_queue(scope="mine")
     assert [job.job_id for job in queue.jobs] == ["102"]
+
+
+def test_snapshot_records_telemetry(load_json, load_text, tmp_path):
+    settings = make_settings(tmp_path)
+    collector = SlurmCollector(
+        settings,
+        runner=FakeRunner(outputs(load_json, load_text)),
+        cache=SQLiteCache(settings.cache_path),
+    )
+
+    collector.get_snapshot(scope="cluster", days=7)
+    trend = collector.get_telemetry(scope="cluster", hours=24)
+
+    assert trend["summary"]["count"] == 1
+    assert trend["summary"]["peak_pending"] == 2
+    assert trend["samples"][0]["gpu_total"] == 18
+
+    prediction = collector.get_prediction(scope="cluster", hours=24)
+    assert prediction["confidence"] == "low"
+    assert prediction["wait_band"] in {"unknown", "now/backfill", "GPU blocked"}
+    assert set(prediction["wait_range_minutes"]) == {"lower", "upper"}
+    assert prediction["confidence_reasons"]
+
+
+def test_collector_storage_quota(load_json, load_text, tmp_path):
+    settings = make_settings(tmp_path)
+    collector = SlurmCollector(
+        settings,
+        runner=FakeRunner(outputs(load_json, load_text)),
+        cache=SQLiteCache(settings.cache_path),
+    )
+
+    storage = collector.get_storage()
+    assert storage.volumes[0].name == "home"
+    assert storage.volumes[1].percent_used == 96
+    assert storage.cache[0].key == "storage"

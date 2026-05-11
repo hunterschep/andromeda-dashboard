@@ -1,0 +1,134 @@
+.storage-triage {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.storage-triage-critical {
+  border-left-color: var(--danger);
+}
+
+.storage-triage-watch {
+  border-left-color: var(--warn);
+}
+
+.storage-triage-head,
+.storage-triage-head > div,
+.storage-signal-title,
+.storage-action-line,
+.storage-clear-line,
+.storage-triage-copy {
+  display: flex;
+  align-items: center;
+}
+
+.storage-triage-head {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.storage-triage-head .section-title {
+  margin-bottom: 0;
+}
+
+.storage-triage-head > div {
+  gap: 8px;
+}
+
+.storage-triage-head > div > span,
+.storage-triage > p,
+.storage-signal > p,
+.storage-action-line,
+.storage-clear-line,
+.storage-signal-title span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.storage-triage > p,
+.storage-signal > p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.storage-triage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+}
+
+.storage-signal {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warn);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.storage-signal.severity-critical {
+  border-left-color: var(--danger);
+}
+
+.storage-signal-title {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.storage-signal-title > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.storage-signal-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.storage-signal-title b {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.storage-action-line,
+.storage-clear-line {
+  gap: 7px;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.storage-action-line svg,
+.storage-clear-line svg {
+  flex: 0 0 auto;
+  color: var(--accent-strong);
+}
+
+.storage-triage-copy {
+  justify-self: start;
+  gap: 6px;
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
+.storage-triage-copy:hover,
+.storage-triage-copy:focus-visible {
+  border-color: var(--accent-strong);
+}

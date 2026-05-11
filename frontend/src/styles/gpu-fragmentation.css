@@ -1,0 +1,113 @@
+.gpu-fragmentation-lens {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.gpu-fragmentation-head,
+.gpu-fragmentation-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gpu-fragmentation-head .section-title {
+  margin-bottom: 0;
+}
+
+.gpu-fragmentation-head > span,
+.gpu-fragmentation-lens > p,
+.gpu-fragmentation-title span,
+.gpu-fragmentation-row p,
+.gpu-fragmentation-row > em {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.gpu-fragmentation-lens > p,
+.gpu-fragmentation-row p,
+.gpu-fragmentation-row > em {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.gpu-fragmentation-list {
+  display: grid;
+  gap: 8px;
+}
+
+.gpu-fragmentation-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.gpu-fragmentation-row.tone-gated,
+.gpu-fragmentation-row.tone-fragmented {
+  border-left-color: var(--warn);
+}
+
+.gpu-fragmentation-row.tone-scarce {
+  border-left-color: var(--danger);
+}
+
+.gpu-fragmentation-title > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.gpu-fragmentation-title strong,
+.gpu-fragmentation-title span,
+.gpu-fragmentation-row dd {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gpu-fragmentation-title em {
+  color: var(--text);
+  font-family: var(--mono);
+  font-style: normal;
+}
+
+.gpu-fragmentation-row dl {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.gpu-node-strip {
+  display: flex;
+  min-height: 28px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #11130f;
+}
+
+.gpu-node-strip span,
+.gpu-node-strip em {
+  padding: 6px 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.gpu-node-strip span {
+  border-right: 1px solid var(--border);
+}
+
+.gpu-node-strip span:last-child {
+  border-right: 0;
+}

@@ -1,0 +1,129 @@
+.gpu-market-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.gpu-market-head,
+.gpu-market-title {
+  display: flex;
+  align-items: center;
+}
+
+.gpu-market-head {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gpu-market-head .section-title {
+  margin-bottom: 0;
+}
+
+.gpu-market-head > span,
+.gpu-market-panel > p,
+.gpu-market-title span,
+.gpu-market-row p,
+.gpu-market-row em {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.gpu-market-panel > p,
+.gpu-market-row p,
+.gpu-market-row em {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.gpu-market-list {
+  display: grid;
+  gap: 8px;
+}
+
+.gpu-market-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.gpu-market-row.tone-watch {
+  border-left-color: var(--warn);
+}
+
+.gpu-market-row.tone-hot {
+  border-left-color: var(--danger);
+}
+
+.gpu-market-title {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gpu-market-title > div {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.gpu-market-title strong,
+.gpu-market-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gpu-market-meter {
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  background: #11130f;
+}
+
+.gpu-market-meter span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.tone-watch .gpu-market-meter span {
+  background: var(--warn);
+}
+
+.tone-hot .gpu-market-meter span {
+  background: var(--danger);
+}
+
+.gpu-market-row dl {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+}
+
+.gpu-market-row dd {
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gpu-market-row em {
+  font-style: normal;
+}
+
+@media (max-width: 720px) {
+  .gpu-market-row dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

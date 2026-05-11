@@ -125,10 +125,16 @@ class QueueJob(BaseModel):
     user: str
     account: str | None = None
     partition: str | None = None
+    qos: str | None = None
     state: str
     state_reason: str | None = None
     state_description: str | None = None
     reason_label: str | None = None
+    constraints: list[str] = Field(default_factory=list)
+    required_nodes: list[str] = Field(default_factory=list)
+    excluded_nodes: list[str] = Field(default_factory=list)
+    reservation: str | None = None
+    licenses: list[str] = Field(default_factory=list)
     cpus: int = 0
     memory_mb: int | None = None
     gpus: list[QueueGpuRequest] = Field(default_factory=list)
@@ -170,8 +176,12 @@ class HistoryJob(BaseModel):
     end_time: datetime | None = None
     wait_seconds: int | None = None
     runtime_seconds: int | None = None
+    max_rss_mb: int | None = None
+    total_cpu_seconds: int | None = None
     requested_tres: dict[str, str] = Field(default_factory=dict)
     allocated_tres: dict[str, str] = Field(default_factory=dict)
+    tres_usage_in_ave: dict[str, str] = Field(default_factory=dict)
+    tres_usage_in_max: dict[str, str] = Field(default_factory=dict)
 
 
 class HistoryResponse(BaseModel):
@@ -214,6 +224,20 @@ class SchedulerHealth(BaseModel):
     raw: dict[str, str] = Field(default_factory=dict)
 
 
+class PriorityJob(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    job_id: str
+    priority: float = 0
+    age: float = 0
+    fairshare: float = 0
+    job_size: float = 0
+    partition: float = 0
+    qos: float = 0
+    tres: float = 0
+    dominant_factor: str | None = None
+
+
 class Insight(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -231,6 +255,7 @@ class InsightsResponse(BaseModel):
     insights: list[Insight] = Field(default_factory=list)
     scheduler: SchedulerHealth | None = None
     account_limits: AccountLimits | None = None
+    priority_jobs: list[PriorityJob] = Field(default_factory=list)
     cache: list[CacheMeta] = Field(default_factory=list)
 
 

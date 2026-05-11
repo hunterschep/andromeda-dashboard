@@ -23,6 +23,7 @@
 body {
   margin: 0;
   min-width: 320px;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
 }
@@ -32,4 +33,3 @@ input,
 select {
   font: inherit;
 }
-

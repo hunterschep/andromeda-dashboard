@@ -25,6 +25,7 @@ def test_live_read_only_slurm_probes_complete_within_60_seconds():
         "scontrol show partition --json >/dev/null",
         "sdiag >/dev/null",
         "sprio -w >/dev/null",
+        'sprio -h -o "%.18i|%.12Y|%.12A|%.12F|%.12J|%.12P|%.12Q|%.12T" >/dev/null',
     ]
     for command in commands:
         runner.run(command, timeout_seconds=10)

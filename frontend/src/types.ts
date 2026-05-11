@@ -95,10 +95,16 @@ export type QueueJob = {
   user: string;
   account: string | null;
   partition: string | null;
+  qos: string | null;
   state: string;
   state_reason: string | null;
   state_description: string | null;
   reason_label: string | null;
+  constraints: string[];
+  required_nodes: string[];
+  excluded_nodes: string[];
+  reservation: string | null;
+  licenses: string[];
   cpus: number;
   memory_mb: number | null;
   gpus: QueueGpuRequest[];
@@ -127,10 +133,21 @@ export type HistoryJob = {
   job_id: string;
   name: string | null;
   user: string | null;
+  account: string | null;
   partition: string | null;
   state: string;
+  exit_code: string | null;
+  submit_time: string | null;
+  start_time: string | null;
+  end_time: string | null;
   wait_seconds: number | null;
   runtime_seconds: number | null;
+  max_rss_mb: number | null;
+  total_cpu_seconds: number | null;
+  requested_tres: Record<string, string>;
+  allocated_tres: Record<string, string>;
+  tres_usage_in_ave: Record<string, string>;
+  tres_usage_in_max: Record<string, string>;
 };
 
 export type HistoryResponse = {
@@ -160,6 +177,18 @@ export type SchedulerHealth = {
   raw: Record<string, string>;
 };
 
+export type PriorityJob = {
+  job_id: string;
+  priority: number;
+  age: number;
+  fairshare: number;
+  job_size: number;
+  partition: number;
+  qos: number;
+  tres: number;
+  dominant_factor: string | null;
+};
+
 export type QosLimit = {
   name: string;
   max_jobs_per_user: number | null;
@@ -178,6 +207,7 @@ export type InsightsResponse = {
   insights: Insight[];
   scheduler: SchedulerHealth | null;
   account_limits: AccountLimits | null;
+  priority_jobs: PriorityJob[];
   cache: CacheMeta[];
 };
 
@@ -201,5 +231,66 @@ export type DashboardSnapshot = {
   my_jobs: QueueResponse;
   history: HistoryResponse;
   insights: InsightsResponse;
+  cache: CacheMeta[];
+};
+
+export type TelemetrySample = {
+  captured_at: number;
+  scope: string;
+  running: number;
+  pending: number;
+  gpu_free: number;
+  gpu_total: number;
+  cpus_idle: number;
+  cpus_total: number;
+  nodes_available: number;
+  nodes_total: number;
+};
+
+export type TelemetryResponse = {
+  scope: "mine" | "lab" | "cluster";
+  hours: number;
+  samples: TelemetrySample[];
+  summary: {
+    count: number;
+    peak_pending: number;
+    median_pending: number;
+    lowest_gpu_free: number;
+    latest_pressure: number;
+    quietest_hour: number | null;
+  };
+};
+
+export type QueuePredictionResponse = {
+  scope: "mine" | "lab" | "cluster";
+  hours: number;
+  confidence: "low" | "medium" | "high";
+  trend: "unknown" | "falling" | "rising" | "flat";
+  estimated_clear_minutes: number | null;
+  wait_range_minutes?: {
+    lower: number | null;
+    upper: number | null;
+  };
+  confidence_reasons?: string[];
+  wait_band: string;
+  pending_trend_per_hour: number;
+  recommendation: string;
+};
+
+export type StorageVolume = {
+  name: string;
+  path: string | null;
+  used_gb: number | null;
+  quota_gb: number | null;
+  percent_used: number | null;
+  files_used: number | null;
+  files_quota: number | null;
+  file_percent_used: number | null;
+  severity: "info" | "warning" | "critical";
+};
+
+export type StorageResponse = {
+  volumes: StorageVolume[];
+  raw: string;
   cache: CacheMeta[];
 };

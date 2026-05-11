@@ -13,7 +13,9 @@ from andromeda_dashboard.normalizers import (
     parse_sacctmgr_assoc,
     parse_sacctmgr_qos,
     parse_sdiag,
+    parse_sprio_jobs,
     parse_sprio_weights,
+    parse_storage_quota,
 )
 
 
@@ -82,11 +84,17 @@ def test_queue_privacy_scope_and_reason_labels(load_json):
     lab_job = next(job for job in queue.jobs if job.job_id == "102")
     assert lab_job.reason_label == "Waiting for requested CPUs, memory, GPUs, or nodes to free up"
     assert lab_job.estimated_start_time is not None
+    assert lab_job.qos == "normal"
+    assert lab_job.constraints == ["large-mem", "rome"]
+    assert lab_job.required_nodes == ["cpu001"]
 
     private_job = next(job for job in queue.jobs if job.job_id == "103")
     assert private_job.anonymized is True
     assert private_job.user.startswith("user-")
     assert private_job.name is None
+    assert private_job.qos == "int"
+    assert private_job.reservation == "course"
+    assert private_job.licenses == ["matlab:1"]
 
     mine = normalize_queue(
         load_json("queue.json"),
@@ -104,6 +112,9 @@ def test_history_and_text_parsers(load_json, load_text):
     assert history.median_wait_seconds == 900
     assert history.median_runtime_seconds == 2700
     assert history.jobs[1].name == "failed-gpu"
+    assert history.jobs[1].max_rss_mb == 7168
+    assert history.jobs[1].total_cpu_seconds == 480
+    assert history.jobs[1].tres_usage_in_ave["gres/gpuutil"] == "6"
     assert "submit_line" not in history.jobs[1].model_dump()
 
     qos = parse_sacctmgr_qos(load_text("qos.txt"))
@@ -124,6 +135,41 @@ def test_history_and_text_parsers(load_json, load_text):
     weights = parse_sprio_weights(load_text("sprio.txt"))
     assert weights["fairshare"] == 10000
     assert weights["tres"] == 5000
+    priority_jobs = parse_sprio_jobs(load_text("sprio.txt"))
+    assert priority_jobs[0].job_id == "102"
+    assert priority_jobs[0].dominant_factor == "fairshare"
+    assert priority_jobs[1].tres == 60
+
+    storage = parse_storage_quota(load_text("storage.txt"))
+    assert storage.volumes[1].name == "scratch"
+    assert storage.volumes[1].percent_used == 96
+    assert storage.volumes[1].severity == "critical"
+
+
+def test_storage_parser_ignores_acct_chk_identity_noise():
+    raw = """
+Pinky output:
+Login  name:  scheppat  In  real  life:  Hunter  M  Scheppat  Directory:  /home/scheppat  Shell:  /bin/bash
+uid=11255(scheppat)  gid=11255(scheppat)  groups=11255(scheppat),1529(prudlab)
+drwx------  1  scheppat  scheppat  0  May  6  16:58  /home/scheppat
+
+User level disk usage
+OWNER     PATH               USED     SOFT_LIMIT  HARD_LIMIT  USAGE_%  GRACE_PERIOD  TIME_OVER_SOFT_LIMIT  STATUS
+scheppat  /home/scheppat     31.25GB  45.00GB     50.00GB     69       14d_0:00:00h  0.00s                 ACTIVE
+scheppat  /scratch/scheppat  1.15TB   1TB         25TB        115      7d_0:00:00h   6:58:12h              ACTIVE
+
+Group level disk usage for the specified group(s)
+GROUP    POSIX       OWNER     PATH               USED    SOFT_LIMIT  HARD_LIMIT  USAGE_%  GRACE_PERIOD  TIME_OVER_SOFT_LIMIT  STATUS
+prudlab  drwxrws---  prudhome  /projects/prudlab  3.89TB  10TB        25TB        38       14d_0:00:00h  0.00s                 ACTIVE
+"""
+    storage = parse_storage_quota(raw)
+
+    assert [volume.name for volume in storage.volumes] == ["home", "scratch", "projects"]
+    scratch = storage.volumes[1]
+    assert scratch.path == "/scratch/scheppat"
+    assert scratch.quota_gb == 1024
+    assert scratch.percent_used == 115
+    assert scratch.severity == "critical"
 
 
 def test_live_slurm_nested_values_are_normalized():

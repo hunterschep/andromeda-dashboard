@@ -1,0 +1,73 @@
+.ops-brief-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-left: 3px solid var(--accent);
+}
+
+.ops-brief-panel.tone-watch {
+  border-left-color: var(--warn);
+}
+
+.ops-brief-panel.tone-critical {
+  border-left-color: var(--danger);
+}
+
+.ops-brief-head,
+.ops-brief-head > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ops-brief-head {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ops-brief-head .section-title {
+  margin-bottom: 0;
+}
+
+.ops-brief-head span,
+.ops-brief-panel > p,
+.ops-brief-lines span,
+.ops-brief-lines p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ops-brief-head span {
+  font-family: var(--mono);
+}
+
+.ops-brief-panel > p,
+.ops-brief-lines p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.ops-brief-lines {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ops-brief-lines > div {
+  display: grid;
+  gap: 4px;
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.ops-brief-lines strong {
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -10,6 +10,7 @@ export function Sidebar({ alias, config }: { alias: string; config: ConfigStatus
       </div>
       <nav aria-label="Dashboard sections">
         <a href="#overview">Overview</a>
+        <a href="#intelligence">Intel</a>
         <a href="#nodes">Nodes</a>
         <a href="#gpus">GPU Pools</a>
         <a href="#partitions">Partitions</a>
@@ -45,7 +46,7 @@ export function Topbar({
   return (
     <header className="topbar">
       <div>
-        <h1>Compute Dashboard</h1>
+        <h1>Andromeda Compute</h1>
         <p>
           {alias} / {user} / {scope}
         </p>

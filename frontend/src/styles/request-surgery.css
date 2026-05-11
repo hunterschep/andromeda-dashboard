@@ -1,0 +1,99 @@
+.request-surgery-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.request-surgery-head,
+.request-surgery-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.request-surgery-head .section-title {
+  margin-bottom: 0;
+}
+
+.request-surgery-head > span,
+.request-surgery-panel > p,
+.request-surgery-title span,
+.request-surgery-row p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.request-surgery-head > span {
+  font-family: var(--mono);
+}
+
+.request-surgery-panel > p,
+.request-surgery-row p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.request-surgery-list {
+  display: grid;
+  gap: 8px;
+}
+
+.request-surgery-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.request-surgery-row.tone-blocked {
+  border-left-color: var(--danger);
+}
+
+.request-surgery-row.tone-monitor {
+  border-left-color: var(--warn);
+}
+
+.request-surgery-title > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.request-surgery-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.request-surgery-row .icon-button {
+  height: 30px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+.request-surgery-row > strong {
+  font-size: 13px;
+}
+
+.request-surgery-row code {
+  display: block;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-muted);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre;
+}

@@ -1,24 +1,29 @@
-import {
-  AlertTriangle,
-  Clock3,
-  Cpu,
-  Database,
-  Gauge,
-  HardDrive,
-  Rows3,
-  Server,
-  Terminal,
-  User
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { formatMemory, formatNumber } from "./api";
-import { Metric, SectionTitle, StatusLine } from "./components/common";
-import { HistoryBox, HistoryTable, JobList, JobRuntimePanel } from "./components/Jobs";
-import { GpuTable, PartitionMatrix, PartitionTable } from "./components/Resources";
-import { NodesSection, QueueSection } from "./components/Sections";
+import { AlertTriangle } from "lucide-react";
+import { lazy, Suspense, type ReactNode, useEffect, useMemo, useState } from "react";
+import { ActivityFeed } from "./components/ActivityFeed";
+import { ActionRunlistPanel } from "./components/ActionRunlistPanel";
+import { ComputeCommitmentPanel } from "./components/ComputeCommitmentPanel";
+import { DataFreshnessPanel } from "./components/DataFreshnessPanel";
+import { ExecutiveCommand } from "./components/ExecutiveCommand";
+import { SectionTitle, StatusLine } from "./components/common";
+import { CommandDeck } from "./components/Intelligence";
+import { OpsBriefPanel } from "./components/OpsBriefPanel";
+import { PredictionPanel } from "./components/PredictionPanel";
+import { PressureAnomalyPanel } from "./components/PressureAnomalyPanel";
+import { PressureCalendarPanel } from "./components/PressureCalendarPanel";
+import { ReplayDeltaPanel } from "./components/ReplayDeltaPanel";
+import { RefreshHealthPanel } from "./components/RefreshHealthPanel";
+import { SchedulerWeatherPanel } from "./components/SchedulerWeatherPanel";
 import { Sidebar, Topbar } from "./components/Shell";
-import { AccountLimitsPanel, CacheTable, CommandList, InsightsList, SchedulerPanel } from "./components/Tools";
+import { SubmitWindowAdvisorPanel } from "./components/SubmitWindowAdvisorPanel";
+import { TelemetryPanel } from "./components/TelemetryPanel";
+import { InsightsList } from "./components/Tools";
 import { useDashboardSnapshot } from "./hooks/useDashboardSnapshot";
+import { useActivityFeed } from "./hooks/useActivityFeed";
+import { useQueuePrediction } from "./hooks/useQueuePrediction";
+import { useStorage } from "./hooks/useStorage";
+import { useTelemetry } from "./hooks/useTelemetry";
+import { buildAndromedaIntelligence } from "./lib/intelligence";
 import {
   buildCommands,
   dedupeCache,
@@ -27,6 +32,13 @@ import {
   summarizeQueuePressure,
   summarizeUsers
 } from "./lib/dashboard";
+
+const NodesSection = lazy(() => import("./components/Sections").then((module) => ({ default: module.NodesSection })));
+const GpuSection = lazy(() => import("./components/GpuSection").then((module) => ({ default: module.GpuSection })));
+const PartitionSection = lazy(() => import("./components/PartitionSection").then((module) => ({ default: module.PartitionSection })));
+const QueueSection = lazy(() => import("./components/Sections").then((module) => ({ default: module.QueueSection })));
+const JobsSection = lazy(() => import("./components/JobsSection").then((module) => ({ default: module.JobsSection })));
+const PowerToolsSection = lazy(() => import("./components/PowerToolsSection").then((module) => ({ default: module.PowerToolsSection })));
 
 export function App() {
   const [scope, setScope] = useState<"mine" | "lab" | "cluster">("mine");
@@ -91,6 +103,29 @@ export function App() {
   const nodeSummary = useMemo(() => summarizeNodes(filteredNodes), [filteredNodes]);
   const queuePressure = useMemo(() => summarizeQueuePressure(state.queue?.jobs ?? []), [state.queue]);
   const userWorkload = useMemo(() => summarizeUsers(state.queue?.jobs ?? []), [state.queue]);
+  const activityEvents = useActivityFeed({
+    resources: state.resources,
+    queue: state.queue,
+    loadedAt: state.loadedAt
+  });
+  const telemetryResource = useTelemetry(state.queue?.scope ?? scope, state.loadedAt);
+  const predictionResource = useQueuePrediction(state.queue?.scope ?? scope, state.loadedAt);
+  const storageResource = useStorage(state.loadedAt);
+  const telemetry = telemetryResource.data;
+  const prediction = predictionResource.data;
+  const storage = storageResource.data;
+  const intelligence = useMemo(
+    () =>
+      buildAndromedaIntelligence({
+        nodes,
+        gpuPools: state.resources?.gpu_pools ?? [],
+        partitions,
+        jobs: state.queue?.jobs ?? [],
+        history: state.history,
+        scheduler: state.insightsData?.scheduler ?? null
+      }),
+    [nodes, partitions, state.queue, state.resources, state.history, state.insightsData]
+  );
   const cluster = state.resources?.cluster;
   const alias = state.config?.ssh_alias ?? "andromeda";
   const commands = useMemo(() => buildCommands(alias), [alias]);
@@ -117,63 +152,95 @@ export function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell executive-ui">
       <Sidebar alias={alias} config={state.config} />
       <main>
         <Topbar alias={alias} user={state.config?.current_user ?? "remote user"} scope={state.queue?.scope ?? scope} onExport={exportSnapshot} onRefresh={() => void load(scope)} />
         <StatusLine loadedAt={state.loadedAt} loading={state.loading} staleCount={stale.length} cacheCount={allCache.length} scope={state.queue?.scope ?? scope} refreshCadence={refreshCadence} onRefreshCadence={setRefreshCadence} />
         <Notices error={state.error} stale={stale} />
-        <section id="overview" className="overview-strip" aria-label="Cluster overview">
-          <Metric icon={<Gauge size={18} />} label="Jobs" value={`${cluster?.running_jobs ?? 0} / ${cluster?.pending_jobs ?? 0}`} detail="running / pending" />
-          <Metric icon={<Server size={18} />} label="Nodes" value={`${cluster?.nodes_available ?? 0} / ${cluster?.nodes_total ?? 0}`} detail="available / total" />
-          <Metric icon={<Database size={18} />} label="GPUs" value={formatNumber(cluster?.gpu_free)} detail={`${formatNumber(cluster?.gpu_total)} total`} />
-          <Metric icon={<Cpu size={18} />} label="CPUs" value={formatNumber(cluster?.cpus_idle)} detail={`${formatNumber(cluster?.cpus_total)} total`} />
-          <Metric icon={<HardDrive size={18} />} label="Memory" value={formatMemory(cluster?.memory_free_mb)} detail="free" />
-        </section>
-        <NodesSection {...{ filteredNodes, nodeSummary, partitions, gpuTypes, nodeStates, nodePartitionFilter, nodeGpuFilter, nodeStateFilter, nodeQuery, setNodePartitionFilter, setNodeGpuFilter, setNodeStateFilter, setNodeQuery }} />
-        <section id="gpus" className="panel">
-          <SectionTitle icon={<Database size={18} />} title="GPU Availability" />
-          <GpuTable pools={state.resources?.gpu_pools ?? []} loading={state.loading} />
-        </section>
-        <section id="partitions" className="panel">
-          <SectionTitle icon={<Rows3 size={18} />} title="Partition Matrix" />
-          <PartitionMatrix partitions={partitions} />
-          <div className="section-subtitle">
-            <SectionTitle icon={<Server size={18} />} title="Partition Detail" />
-          </div>
-          <PartitionTable partitions={partitions} />
-        </section>
-        <QueueSection {...{ scope, setScope, partitionFilter, gpuFilter, stateFilter, reasonFilter, query, setPartitionFilter, setGpuFilter, setStateFilter, setReasonFilter, setQuery, partitions, gpuTypes, reasons, queuePressure, userWorkload, filteredJobs }} />
-        <section id="jobs" className="panel two-column">
-          <div>
-            <SectionTitle icon={<User size={18} />} title={`My Jobs - ${state.config?.current_user ?? "remote user"}`} />
-            <JobRuntimePanel jobs={state.myJobs?.jobs ?? []} />
-            <JobList jobs={state.myJobs?.jobs ?? []} onCopy={copyText} alias={alias} />
-          </div>
-          <div>
-            <SectionTitle icon={<Clock3 size={18} />} title="Recent History" />
-            <HistoryBox history={state.history} />
-            <HistoryTable history={state.history} />
-          </div>
-        </section>
+        <ExecutiveCommand
+          cluster={cluster}
+          gpuPools={state.resources?.gpu_pools ?? []}
+          jobs={state.queue?.jobs ?? []}
+          scheduler={state.insightsData?.scheduler ?? undefined}
+          cache={allCache}
+          loading={state.loading}
+          loadedAt={state.loadedAt}
+        />
+        <CommandDeck intelligence={intelligence} scheduler={state.insightsData?.scheduler ?? null}>
+          <ActivityFeed events={activityEvents} />
+          <DataFreshnessPanel cache={allCache} loadedAt={state.loadedAt} loading={state.loading} error={state.error} alias={alias} onCopy={copyText} />
+          <RefreshHealthPanel loadedAt={state.loadedAt} loading={state.loading} error={state.error} cache={allCache} cadence={refreshCadence} telemetry={telemetryResource} prediction={predictionResource} storage={storageResource} />
+          <OpsBriefPanel jobs={state.queue?.jobs ?? []} gpuPools={state.resources?.gpu_pools ?? []} nodes={nodes} history={state.history} cache={allCache} onCopy={copyText} />
+          <ActionRunlistPanel
+            jobs={state.queue?.jobs ?? []}
+            myJobs={state.myJobs?.jobs ?? []}
+            gpuPools={state.resources?.gpu_pools ?? []}
+            storage={storage}
+            cache={allCache}
+            prediction={prediction}
+            alias={alias}
+            onCopy={copyText}
+          />
+          <TelemetryPanel telemetry={telemetry} />
+          <ReplayDeltaPanel telemetry={telemetry} />
+          <PressureCalendarPanel telemetry={telemetry} />
+          <SubmitWindowAdvisorPanel telemetry={telemetry} jobs={state.queue?.jobs ?? []} history={state.history} gpuPools={state.resources?.gpu_pools ?? []} alias={alias} onCopy={copyText} />
+          <PressureAnomalyPanel telemetry={telemetry} />
+          <PredictionPanel prediction={prediction} />
+          <SchedulerWeatherPanel scheduler={state.insightsData?.scheduler ?? null} pendingJobs={state.queue?.pending ?? 0} alias={alias} onCopy={copyText} />
+          <ComputeCommitmentPanel jobs={state.queue?.jobs ?? []} />
+        </CommandDeck>
+        <LazySection label="Node Explorer">
+          <NodesSection {...{ filteredNodes, allNodes: nodes, nodeSummary, partitions, gpuTypes, nodeStates, nodePartitionFilter, nodeGpuFilter, nodeStateFilter, nodeQuery, jobs: state.queue?.jobs ?? [], alias, onCopy: copyText, setNodePartitionFilter, setNodeGpuFilter, setNodeStateFilter, setNodeQuery }} />
+        </LazySection>
+        <LazySection label="GPU Availability">
+          <GpuSection nodes={nodes} pools={state.resources?.gpu_pools ?? []} jobs={state.queue?.jobs ?? []} scarcity={intelligence.gpuScarcity} loading={state.loading} alias={alias} onCopy={copyText} />
+        </LazySection>
+        <LazySection label="Partition Matrix">
+          <PartitionSection partitions={partitions} jobs={state.queue?.jobs ?? []} alias={alias} onCopy={copyText} />
+        </LazySection>
+        <LazySection label="Queue Explorer">
+          <QueueSection {...{ scope, setScope, partitionFilter, gpuFilter, stateFilter, reasonFilter, query, setPartitionFilter, setGpuFilter, setStateFilter, setReasonFilter, setQuery, partitions, gpuTypes, nodes, reasons, queuePressure, userWorkload, filteredJobs, forecast: intelligence.queue, history: state.history, prediction, priorityJobs: state.insightsData?.priority_jobs ?? [], scheduler: state.insightsData?.scheduler ?? null, alias, onCopy: copyText }} />
+        </LazySection>
+        <LazySection label="My Jobs">
+          <JobsSection currentUser={state.config?.current_user ?? "remote user"} myJobs={state.myJobs} history={state.history} storage={storage} alias={alias} onCopy={copyText} />
+        </LazySection>
         <section id="insights" className="panel">
           <SectionTitle icon={<AlertTriangle size={18} />} title="Insights" />
           <InsightsList insights={state.insightsData?.insights ?? []} />
         </section>
-        <section id="tools" className="panel">
-          <div className="section-row">
-            <SectionTitle icon={<Terminal size={18} />} title="Power Tools" />
-            {copied ? <span className="count-label">Copied {copied}</span> : null}
-          </div>
-          <div className="tools-grid">
-            <SchedulerPanel scheduler={state.insightsData?.scheduler ?? null} />
-            <AccountLimitsPanel accountLimits={state.insightsData?.account_limits ?? null} />
-          </div>
-          <CommandList commands={commands} onCopy={copyText} />
-          <CacheTable cache={allCache} />
-        </section>
+        <LazySection label="Power Tools">
+          <PowerToolsSection
+            copied={copied}
+            partitions={partitions}
+            gpuPools={state.resources?.gpu_pools ?? []}
+            jobs={state.queue?.jobs ?? []}
+            activeJobs={state.myJobs?.jobs ?? []}
+            history={state.history}
+            storage={storage}
+            accountLimits={state.insightsData?.account_limits ?? null}
+            scheduler={state.insightsData?.scheduler ?? null}
+            alias={alias}
+            commands={commands}
+            cache={allCache}
+            onCopy={copyText}
+          />
+        </LazySection>
       </main>
     </div>
+  );
+}
+
+function LazySection({ label, children }: { label: string; children: ReactNode }) {
+  return <Suspense fallback={<SectionFallback label={label} />}>{children}</Suspense>;
+}
+
+function SectionFallback({ label }: { label: string }) {
+  return (
+    <section className="panel section-loading" aria-label={`${label} loading`}>
+      <span>{label} loading</span>
+    </section>
   );
 }
 

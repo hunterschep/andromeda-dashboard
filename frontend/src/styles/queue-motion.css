@@ -1,0 +1,92 @@
+.queue-motion-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.queue-motion-head,
+.queue-motion-title {
+  display: flex;
+  align-items: center;
+}
+
+.queue-motion-head {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.queue-motion-head .section-title {
+  margin-bottom: 0;
+}
+
+.queue-motion-head > span,
+.queue-motion-panel > p,
+.queue-motion-title span,
+.queue-motion-row p,
+.queue-motion-row em {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.queue-motion-panel > p,
+.queue-motion-row p,
+.queue-motion-row em {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.queue-motion-list {
+  display: grid;
+  gap: 8px;
+}
+
+.queue-motion-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.queue-motion-row.tone-dark,
+.queue-motion-row.tone-gated {
+  border-left-color: var(--warn);
+}
+
+.queue-motion-row.tone-unknown {
+  border-left-color: var(--muted);
+}
+
+.queue-motion-title {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.queue-motion-title > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.queue-motion-title strong,
+.queue-motion-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-motion-row dl {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.queue-motion-row em {
+  font-style: normal;
+}

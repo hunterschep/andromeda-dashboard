@@ -1,0 +1,91 @@
+.lab-footprint-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.lab-footprint-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lab-footprint-head .section-title {
+  margin-bottom: 0;
+}
+
+.lab-footprint-head > span,
+.lab-footprint-panel > p,
+.lab-footprint-users p,
+.lab-footprint-users em {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.lab-footprint-panel > p,
+.lab-footprint-users p,
+.lab-footprint-users em {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.lab-footprint-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.lab-footprint-summary dd,
+.lab-footprint-users span {
+  color: var(--text);
+  font-family: var(--mono);
+}
+
+.lab-footprint-users {
+  display: grid;
+  gap: 8px;
+}
+
+.lab-footprint-users article {
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.lab-footprint-users article > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.footprint-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #11130f;
+}
+
+.footprint-track span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.tone-busy .footprint-track span {
+  background: var(--warn);
+}
+
+.tone-hot .footprint-track span {
+  background: var(--danger);
+}
+
+.lab-footprint-users em {
+  font-style: normal;
+}

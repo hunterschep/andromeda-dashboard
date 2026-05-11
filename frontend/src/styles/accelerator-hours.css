@@ -1,0 +1,102 @@
+.accelerator-hour-ledger {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.accelerator-hour-head,
+.accelerator-hour-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.accelerator-hour-head {
+  flex-wrap: wrap;
+}
+
+.accelerator-hour-head .section-title {
+  margin-bottom: 0;
+}
+
+.accelerator-hour-head > span,
+.accelerator-hour-ledger > p,
+.accelerator-hour-title span,
+.accelerator-hour-row p,
+.accelerator-hour-row em {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.accelerator-hour-ledger > p,
+.accelerator-hour-row p,
+.accelerator-hour-row em {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.accelerator-hour-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.accelerator-hour-row {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.accelerator-hour-row.tone-busy {
+  border-left-color: var(--warn);
+}
+
+.accelerator-hour-row.tone-hot {
+  border-left-color: var(--danger);
+}
+
+.accelerator-hour-title > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.accelerator-hour-title strong,
+.accelerator-hour-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accelerator-hour-row dl {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.accelerator-hour-row dd {
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accelerator-hour-row em {
+  font-style: normal;
+}
+
+@media (max-width: 640px) {
+  .accelerator-hour-row dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

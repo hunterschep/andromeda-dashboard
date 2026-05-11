@@ -28,16 +28,25 @@ npm install --prefix frontend
 
 andromeda-dashboard init-config
 andromeda-dashboard check-ssh
+bash scripts/dev.sh
+```
+
+Open `http://127.0.0.1:5173`.
+
+If you prefer separate terminals, start the backend first:
+
+```bash
 andromeda-dashboard serve
 ```
 
-In a second terminal:
+Then start Vite:
 
 ```bash
 npm run dev --prefix frontend
 ```
 
-Open `http://127.0.0.1:5173`.
+If the dashboard says `/api/snapshot` returned `500`, the Vite frontend is running without
+the FastAPI backend. Start `andromeda-dashboard serve` or use `bash scripts/dev.sh`.
 
 For the built single-server path:
 
@@ -136,7 +145,7 @@ normalized once and cache diagnostics cover every data source the dashboard depe
 The collector uses read-only CLI probes over SSH: `scontrol show nodes --json`,
 `scontrol show partition --json`, `sinfo --json`, `squeue --json`,
 `squeue --start --json`, `sacct --json`, `sacctmgr show assoc`,
-`sacctmgr show qos`, `sdiag`, and `sprio -w`.
+`sacctmgr show qos`, `sdiag`, `sprio -w`, and `sprio` priority-factor rows.
 
 Cache TTLs:
 
@@ -155,6 +164,8 @@ Cache TTLs:
   filters, Slurm start estimates, dependencies, node placement, and pending reason labels.
 - Queue pressure panel with running/pending totals, pending CPU/GPU demand, top pending
   reasons, partition load, GPU asks, and visible-user workload.
+- Slurm priority anatomy that breaks pending jobs into age, fairshare, job size, partition,
+  QOS, and TRES contributions instead of only showing a composite priority number.
 - My Jobs panel with elapsed/limit/request/node details and one-click copy for
   `scontrol show job -dd`.
 - Runtime rows for active jobs and a recent accounting table with wait/runtime/state.

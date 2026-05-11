@@ -1,0 +1,117 @@
+.checkpoint-panel {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.checkpoint-head,
+.checkpoint-title {
+  display: flex;
+  align-items: center;
+}
+
+.checkpoint-head {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.checkpoint-head .section-title {
+  margin-bottom: 0;
+}
+
+.checkpoint-head > span,
+.checkpoint-panel > p,
+.checkpoint-row p,
+.checkpoint-row em,
+.checkpoint-title span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.checkpoint-panel > p,
+.checkpoint-row p,
+.checkpoint-row em {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.checkpoint-list {
+  display: grid;
+  gap: 8px;
+}
+
+.checkpoint-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.checkpoint-row.tone-watch {
+  border-left-color: var(--warn);
+}
+
+.checkpoint-row.tone-urgent {
+  border-left-color: var(--danger);
+}
+
+.checkpoint-row.tone-unknown {
+  border-left-color: var(--muted);
+}
+
+.checkpoint-title {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.checkpoint-title > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.checkpoint-title strong,
+.checkpoint-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkpoint-track {
+  height: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: #11130f;
+}
+
+.checkpoint-track span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.tone-watch .checkpoint-track span {
+  background: var(--warn);
+}
+
+.tone-urgent .checkpoint-track span {
+  background: var(--danger);
+}
+
+.checkpoint-row dl {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.checkpoint-row em {
+  font-style: normal;
+}

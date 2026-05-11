@@ -1,0 +1,84 @@
+.experiment-monitor {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.experiment-head {
+  display: grid;
+  gap: 10px;
+}
+
+.experiment-head .section-title {
+  margin-bottom: 0;
+}
+
+.experiment-head dl,
+.experiment-row dl {
+  margin: 0;
+}
+
+.experiment-head dl {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.experiment-list {
+  display: grid;
+  gap: 8px;
+}
+
+.experiment-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.experiment-row.severity-critical {
+  border-left-color: var(--danger);
+}
+
+.experiment-row.severity-warning {
+  border-left-color: var(--warn);
+}
+
+.experiment-row.severity-info {
+  border-left-color: var(--accent);
+}
+
+.experiment-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.experiment-title > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.experiment-row p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.experiment-row dl {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.experiment-row dd {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

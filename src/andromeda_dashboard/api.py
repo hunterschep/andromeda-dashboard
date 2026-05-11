@@ -69,6 +69,24 @@ def create_app(
     ):
         return app.state.collector.get_snapshot(scope=scope, days=days)
 
+    @app.get("/api/telemetry")
+    def telemetry(
+        scope: Literal["mine", "lab", "cluster"] = Query("mine"),
+        hours: int = Query(24),
+    ):
+        return app.state.collector.get_telemetry(scope=scope, hours=hours)
+
+    @app.get("/api/prediction")
+    def prediction(
+        scope: Literal["mine", "lab", "cluster"] = Query("mine"),
+        hours: int = Query(24),
+    ):
+        return app.state.collector.get_prediction(scope=scope, hours=hours)
+
+    @app.get("/api/storage")
+    def storage():
+        return app.state.collector.get_storage()
+
     dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
     if dist.exists():
         app.mount("/", StaticFiles(directory=dist, html=True), name="frontend")

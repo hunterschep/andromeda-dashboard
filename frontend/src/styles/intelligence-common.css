@@ -1,0 +1,177 @@
+.operations-deck article,
+.gpu-topology-panel,
+.queue-forecast-panel {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.pulse-copy p,
+.forecast-earliest,
+.queue-explanation p,
+.queue-explanation > span,
+.gpu-node-jobs span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.signal-grid div,
+.scarcity-row,
+.partition-pressure-row,
+.turnover-list div,
+.gpu-node-tile,
+.queue-explanation {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-muted);
+}
+
+.signal-grid dt,
+.scarcity-row dt,
+.partition-pressure-row dt,
+.gpu-node-tile dt,
+.queue-explanation dt {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.signal-grid span,
+.scarcity-row span,
+.partition-pressure-row span,
+.turnover-list em,
+.gpu-topology-summary,
+.gpu-node-title span,
+.gpu-node-family span,
+.gpu-node-tile dd,
+.queue-forecast-head div,
+.queue-explanation-title span,
+.queue-explanation-title em {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.scheduler-strip span,
+.gpu-topology-summary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #11130f;
+  color: var(--muted);
+}
+
+.scarcity-list,
+.partition-pressure-list,
+.turnover-list,
+.gpu-node-grid,
+.queue-explanations {
+  display: grid;
+  gap: 8px;
+}
+
+.scarcity-row > div:first-child,
+.partition-pressure-main,
+.gpu-node-title {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.gpu-cells,
+.gpu-node-cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7px, 1fr));
+  gap: 3px;
+  align-items: center;
+}
+
+.gpu-cells span,
+.gpu-node-cells i {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: #35402f;
+}
+
+.gpu-cells span.used,
+.gpu-node-cells i.used {
+  background: #b9924a;
+}
+
+.gpu-cells span.free,
+.gpu-node-cells i.free {
+  background: #88a967;
+}
+
+.scarcity-row dl,
+.partition-pressure-row dl,
+.gpu-node-tile dl,
+.queue-explanation dl {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+}
+
+.scarcity-row dd,
+.partition-pressure-row dd,
+.gpu-node-tile dd,
+.queue-explanation dd {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.tone-calm {
+  border-color: rgba(143, 178, 103, 0.5);
+}
+
+.tone-busy {
+  border-color: rgba(213, 162, 74, 0.55);
+}
+
+.tone-hot {
+  border-color: rgba(216, 130, 97, 0.62);
+}
+
+.tone-critical {
+  border-color: rgba(223, 107, 95, 0.7);
+}
+
+.tone-calm > span:last-child,
+.tone-calm dd,
+.tone-calm .queue-explanation-title em {
+  color: var(--accent-strong);
+}
+
+.tone-busy > span:last-child,
+.tone-busy dd,
+.tone-busy .queue-explanation-title em {
+  color: var(--warn);
+}
+
+.tone-hot > span:last-child,
+.tone-hot dd,
+.tone-hot .queue-explanation-title em {
+  color: #d98261;
+}
+
+.tone-critical > span:last-child,
+.tone-critical dd,
+.tone-critical .queue-explanation-title em {
+  color: var(--danger);
+}
+
+@keyframes pulse-rise {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}

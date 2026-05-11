@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from collections.abc import Iterable
 from datetime import datetime
 from typing import Any, Literal
@@ -15,6 +16,7 @@ from .common import (
     parse_memory_mb,
     pick,
     split_csvish,
+    unwrap_slurm_value,
 )
 
 PENDING_REASON_LABELS: dict[str, str] = {
@@ -90,10 +92,23 @@ def _queue_job(
         user=visible_user,
         account=str(account) if account is not None else None,
         partition=str(pick(item, "partition", "partition_name", default="") or "") or None,
+        qos=_scalar_text(pick(item, "qos", "qos_name", "qos_raw", default=None)),
         state=state,
         state_reason=str(state_reason) if state_reason is not None else None,
         state_description=pick(item, "state_description", "state_desc", default=None),
         reason_label=PENDING_REASON_LABELS.get(str(state_reason or "")),
+        constraints=_constraint_list(
+            pick(item, "features", "features_used", "batch_features", "constraints", "constraint", default=None),
+            pick(item, "prefer", "preferred_features", default=None),
+        ),
+        required_nodes=_nodes_from_value(
+            pick(item, "required_nodes", "required_node_list", "req_node_list", "req_nodes", default=None)
+        ),
+        excluded_nodes=_nodes_from_value(
+            pick(item, "excluded_nodes", "excluded_node_list", "exc_node_list", "exc_nodes", default=None)
+        ),
+        reservation=_scalar_text(pick(item, "reservation", "reservation_name", "resv_name", default=None)),
+        licenses=_list_from_value(pick(item, "licenses", "licenses_requested", "licenses_allocated", default=None)),
         cpus=parse_int(pick(item, "cpus", "num_cpus", "min_cpus", default=0)),
         memory_mb=parse_memory_mb(
             pick(
@@ -160,3 +175,45 @@ def _nodes_from_value(value: Any) -> list[str]:
     if text in {"", "(null)", "None", "N/A"}:
         return []
     return [node for node in split_csvish(text) if node]
+
+
+def _scalar_text(value: Any) -> str | None:
+    value = unwrap_slurm_value(value)
+    if isinstance(value, list):
+        value = value[0] if value else None
+    if isinstance(value, dict):
+        value = pick(value, "name", "value", "id", default=None)
+    if value is None:
+        return None
+    text = str(value).strip()
+    return None if text in {"", "(null)", "None", "N/A"} else text
+
+
+def _list_from_value(value: Any) -> list[str]:
+    value = unwrap_slurm_value(value)
+    if value is None:
+        return []
+    if isinstance(value, list | tuple | set):
+        values = value
+    else:
+        values = split_csvish(str(value))
+    items: list[str] = []
+    for item in values:
+        text = _scalar_text(item)
+        if text:
+            items.append(text)
+    return sorted(dict.fromkeys(items))
+
+
+def _constraint_list(*values: Any) -> list[str]:
+    tokens: list[str] = []
+    for value in values:
+        value = unwrap_slurm_value(value)
+        if isinstance(value, dict):
+            value = pick(value, "features", "constraint", "name", "value", default=None)
+        for item in _list_from_value(value):
+            for token in re.split(r"[&|,()\[\]\\s]+", item):
+                clean = token.strip().strip("!+'\"")
+                if clean and clean not in {"*", "(null)", "None", "N/A"}:
+                    tokens.append(clean)
+    return sorted(dict.fromkeys(tokens))

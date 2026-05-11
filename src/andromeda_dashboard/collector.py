@@ -1,10 +1,24 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 from typing import Any, Literal
 
 from .cache import CachedPayload, SQLiteCache
+from .commands import (
+    ASSOC,
+    IDENTITY,
+    NODES,
+    PARTITIONS,
+    QOS,
+    QUEUE,
+    SCHEDULER,
+    SINFO,
+    SPRIO,
+    SPRIO_JOBS,
+    STARTS,
+    STORAGE,
+    CommandSpec,
+)
 from .config import Settings
 from .insights import build_insights
 from .models import (
@@ -27,39 +41,12 @@ from .normalizers import (
     parse_sacctmgr_assoc,
     parse_sacctmgr_qos,
     parse_sdiag,
+    parse_sprio_jobs,
     parse_sprio_weights,
 )
 from .ssh import ReadOnlySSHRunner, SSHCommandError
-
-
-@dataclass(frozen=True)
-class CommandSpec:
-    key: str
-    command: str
-    ttl_seconds: int
-    json_output: bool = True
-
-
-NODES = CommandSpec("nodes", "scontrol show nodes --json", 30)
-PARTITIONS = CommandSpec("partitions", "scontrol show partition --json", 3600)
-SINFO = CommandSpec("sinfo", "sinfo --json", 30)
-IDENTITY = CommandSpec("identity", 'printf "%s" "$USER"', 3600, json_output=False)
-QUEUE = CommandSpec("queue", "squeue --json", 30)
-STARTS = CommandSpec("queue-starts", "squeue --start --json", 30)
-SCHEDULER = CommandSpec("scheduler", "sdiag", 60, json_output=False)
-SPRIO = CommandSpec("priority-weights", "sprio -w", 60, json_output=False)
-QOS = CommandSpec(
-    "qos",
-    "sacctmgr show qos format=Name,MaxJobsPU,MaxSubmitPU,MaxTRESPU -P -n",
-    3600,
-    json_output=False,
-)
-ASSOC = CommandSpec(
-    "assoc",
-    'sacctmgr show assoc where user="$USER" format=Cluster,Account,User,QOS -P -n',
-    3600,
-    json_output=False,
-)
+from .storage import parse_storage_quota
+from .telemetry import TelemetryStore
 
 
 class SlurmCollector:
@@ -73,6 +60,7 @@ class SlurmCollector:
         self.settings = settings
         self.runner = runner or ReadOnlySSHRunner(settings.ssh)
         self.cache = cache or SQLiteCache(settings.cache_path)
+        self.telemetry = TelemetryStore(settings.cache_path)
 
     def _result_from_cache_error(
         self, spec: CommandSpec, cached: CachedPayload | None, error: Exception
@@ -211,6 +199,11 @@ class SlurmCollector:
         health.priority_weights = parse_sprio_weights(str(sprio_raw.payload or ""))
         return health, [scheduler_raw.meta, sprio_raw.meta]
 
+    def _get_priority_jobs_with_cache(self):
+        priority_raw = self._run(SPRIO_JOBS)
+        jobs = parse_sprio_jobs(str(priority_raw.payload or ""))
+        return jobs, [priority_raw.meta]
+
     def get_insights(
         self,
         *,
@@ -223,18 +216,21 @@ class SlurmCollector:
         history = history or self.get_history(days=self.settings.history.default_days)
         account_limits, account_cache = self._get_account_limits_with_cache()
         scheduler, scheduler_cache = self._get_scheduler_health_with_cache()
+        priority_jobs, priority_cache = self._get_priority_jobs_with_cache()
         cache: list[CacheMeta] = [
             *resources.cache,
             *queue.cache,
             *history.cache,
             *account_cache,
             *scheduler_cache,
+            *priority_cache,
         ]
         insights = build_insights(resources, queue, history, account_limits, scheduler)
         return InsightsResponse(
             insights=insights,
             scheduler=scheduler,
             account_limits=account_limits,
+            priority_jobs=priority_jobs,
             cache=cache,
         )
 
@@ -259,7 +255,7 @@ class SlurmCollector:
                 *insights.cache,
             ]
         )
-        return DashboardSnapshot(
+        snapshot = DashboardSnapshot(
             config=config,
             resources=resources,
             queue=queue,
@@ -268,6 +264,20 @@ class SlurmCollector:
             insights=insights,
             cache=cache,
         )
+        self.telemetry.record_snapshot(snapshot)
+        return snapshot
+
+    def get_telemetry(self, scope: Literal["mine", "lab", "cluster"] = "mine", hours: int = 24):
+        return self.telemetry.trend(scope=scope, hours=hours)
+
+    def get_prediction(self, scope: Literal["mine", "lab", "cluster"] = "mine", hours: int = 24):
+        return self.telemetry.prediction(scope=scope, hours=hours)
+
+    def get_storage(self):
+        storage_raw = self._run(STORAGE)
+        response = parse_storage_quota(str(storage_raw.payload or ""))
+        response.cache = [storage_raw.meta]
+        return response
 
     @staticmethod
     def _dedupe_cache(cache: list[CacheMeta]) -> list[CacheMeta]:

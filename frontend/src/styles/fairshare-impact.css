@@ -1,0 +1,87 @@
+.fairshare-impact-panel {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.fairshare-impact-panel.tier-medium {
+  border-left-color: var(--warn);
+}
+
+.fairshare-impact-panel.tier-high {
+  border-left-color: var(--danger);
+}
+
+.fairshare-impact-head,
+.fairshare-impact-rows article,
+.fairshare-impact-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fairshare-impact-head .section-title {
+  margin-bottom: 0;
+}
+
+.fairshare-impact-head > span,
+.fairshare-impact-panel p,
+.fairshare-impact-rows span,
+.fairshare-impact-rows em,
+.fairshare-impact-actions span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.fairshare-impact-head > span,
+.fairshare-impact-rows span,
+.fairshare-impact-rows em {
+  font-family: var(--mono);
+}
+
+.fairshare-impact-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.fairshare-impact-summary dd {
+  color: var(--text);
+  font-family: var(--mono);
+}
+
+.fairshare-impact-panel p,
+.fairshare-impact-actions span {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.fairshare-impact-rows {
+  display: grid;
+  gap: 7px;
+}
+
+.fairshare-impact-rows article {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.fairshare-impact-rows article > div {
+  display: grid;
+  gap: 2px;
+}
+
+.fairshare-impact-rows em {
+  font-style: normal;
+}
+
+.fairshare-impact-actions {
+  align-items: center;
+}

@@ -1,7 +1,7 @@
-import { Clipboard, Copy, Database, Gauge } from "lucide-react";
-import { shortTime } from "../api";
+import { Clipboard, Copy, Database, Gauge, HardDrive } from "lucide-react";
+import { formatNumber, shortTime } from "../api";
 import { secondsText, tresText, type ToolCommand } from "../lib/dashboard";
-import type { AccountLimits, CacheMeta, Insight, SchedulerHealth } from "../types";
+import type { AccountLimits, CacheMeta, Insight, SchedulerHealth, StorageResponse } from "../types";
 import { EmptyState, SectionTitle } from "./common";
 
 export function InsightsList({ insights }: { insights: Insight[] }) {
@@ -91,6 +91,63 @@ export function AccountLimitsPanel({ accountLimits }: { accountLimits: AccountLi
   );
 }
 
+export function StoragePanel({
+  storage,
+  alias,
+  onCopy
+}: {
+  storage: StorageResponse | null;
+  alias: string;
+  onCopy: (text: string, label: string) => void;
+}) {
+  return (
+    <div className="tool-panel storage-panel">
+      <div className="storage-head">
+        <SectionTitle icon={<HardDrive size={18} />} title="Storage Pressure" />
+        <button
+          type="button"
+          className="copy-button"
+          onClick={() => onCopy(`ssh ${alias} 'acct-chk "$USER"'`, "storage")}
+          title="Copy storage quota command"
+        >
+          <Copy size={15} aria-hidden="true" />
+        </button>
+      </div>
+      {storage?.volumes.length ? (
+        <div className="storage-list">
+          {storage.volumes.map((volume) => (
+            <article className={`storage-row severity-${volume.severity}`} key={volume.path ?? volume.name}>
+              <div>
+                <strong>{volume.name}</strong>
+                <span className="mono">{volume.path ?? "n/a"}</span>
+              </div>
+              <div className="storage-meter" aria-label={`${volume.name} storage use`}>
+                <i style={{ width: `${Math.min(volume.percent_used ?? 0, 100)}%` }} />
+              </div>
+              <dl>
+                <div>
+                  <dt>space</dt>
+                  <dd>{gb(volume.used_gb)} / {gb(volume.quota_gb)}</dd>
+                </div>
+                <div>
+                  <dt>used</dt>
+                  <dd>{volume.percent_used ?? "n/a"}%</dd>
+                </div>
+                <div>
+                  <dt>files</dt>
+                  <dd>{formatNumber(volume.files_used)} / {formatNumber(volume.files_quota)}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <EmptyState text="Storage quota output has not been parsed yet." />
+      )}
+    </div>
+  );
+}
+
 export function CommandList({
   commands,
   onCopy
@@ -152,6 +209,12 @@ export function CacheTable({ cache }: { cache: CacheMeta[] }) {
       </div>
     </div>
   );
+}
+
+function gb(value: number | null): string {
+  if (value === null) return "n/a";
+  if (value >= 1024) return `${(value / 1024).toFixed(1)} TB`;
+  return `${value.toFixed(1)} GB`;
 }
 
 function KeyValueList({ values, empty }: { values: Record<string, number>; empty: string }) {

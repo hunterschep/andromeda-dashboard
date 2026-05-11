@@ -108,6 +108,13 @@ export function buildCommands(alias: string): ToolCommand[] {
       description: "Show scheduler cycle/backfill stats and priority factor weights."
     },
     {
+      id: "priority-factors",
+      group: "scheduler",
+      label: "Priority Factors",
+      command: `ssh ${alias} 'sprio -h -o "%.18i|%.12Y|%.12A|%.12F|%.12J|%.12P|%.12Q|%.12T"'`,
+      description: "Show the per-job age, fairshare, size, partition, QOS, and TRES priority components."
+    },
+    {
       id: "qos",
       group: "limits",
       label: "QOS Limits",

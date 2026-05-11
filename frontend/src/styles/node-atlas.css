@@ -1,0 +1,104 @@
+.node-atlas-panel {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.node-atlas-head,
+.node-class-title,
+.node-class-partitions {
+  display: flex;
+  align-items: center;
+}
+
+.node-atlas-head {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.node-atlas-head .section-title {
+  margin-bottom: 0;
+}
+
+.node-atlas-head > span,
+.node-class-title span,
+.node-class-row p,
+.node-class-partitions span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.node-atlas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px;
+}
+
+.node-class-row {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.node-class-row.tone-busy {
+  border-left-color: var(--warn);
+}
+
+.node-class-row.tone-hot {
+  border-left-color: var(--danger);
+}
+
+.node-class-title {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.node-class-title > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.node-class-title strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.node-class-title em {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.node-class-row dl {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.node-class-partitions {
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.node-class-partitions span {
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-muted);
+}
+
+.node-class-row p {
+  margin: 0;
+  line-height: 1.45;
+}

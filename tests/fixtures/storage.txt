@@ -1,0 +1,4 @@
+Filesystem|Used|Quota|Files|FileQuota
+/home/hunterschep|72G|100G|90000|100000
+/scratch/hunterschep|9.6T|10T|1200000|2000000
+/projects/lab|42T|50T|4900000|5000000

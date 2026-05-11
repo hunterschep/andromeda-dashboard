@@ -17,7 +17,9 @@ from andromeda_dashboard.collector import (
     SCHEDULER,
     SINFO,
     SPRIO,
+    SPRIO_JOBS,
     STARTS,
+    STORAGE,
     SlurmCollector,
 )
 from andromeda_dashboard.config import Settings
@@ -53,6 +55,8 @@ def test_api_contracts(load_json, load_text, tmp_path):
         ASSOC.command: load_text("assoc.txt"),
         SCHEDULER.command: load_text("sdiag.txt"),
         SPRIO.command: load_text("sprio.txt"),
+        SPRIO_JOBS.command: load_text("sprio.txt"),
+        STORAGE.command: load_text("storage.txt"),
         "sacct --json -S now-7days -n -X": json.dumps(load_json("history.json")),
     }
     collector = SlurmCollector(
@@ -85,6 +89,7 @@ def test_api_contracts(load_json, load_text, tmp_path):
     insights = client.get("/api/insights").json()
     assert insights["insights"]
     assert insights["scheduler"]["backfill_last_depth"] == 120
+    assert insights["priority_jobs"][0]["dominant_factor"] == "fairshare"
 
     snapshot = client.get("/api/snapshot?scope=mine&days=7").json()
     assert set(snapshot) >= {
@@ -102,3 +107,17 @@ def test_api_contracts(load_json, load_text, tmp_path):
     assert snapshot["resources"]["cluster"]["nodes_total"] == 4
     assert snapshot["history"]["median_wait_seconds"] == 900
     assert snapshot["cache"]
+
+    telemetry = client.get("/api/telemetry?scope=mine&hours=24").json()
+    assert telemetry["summary"]["count"] == 1
+    assert telemetry["samples"][0]["pending"] == 0
+
+    prediction = client.get("/api/prediction?scope=mine&hours=24").json()
+    assert prediction["confidence"] == "low"
+    assert prediction["wait_band"] == "now/backfill"
+    assert prediction["wait_range_minutes"] == {"lower": 0, "upper": 15}
+    assert prediction["confidence_reasons"][0] == "1 telemetry sample(s) in window"
+
+    storage = client.get("/api/storage").json()
+    assert storage["volumes"][1]["name"] == "scratch"
+    assert storage["volumes"][1]["severity"] == "critical"

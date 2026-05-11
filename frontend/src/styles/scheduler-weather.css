@@ -1,0 +1,67 @@
+.scheduler-weather-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-left: 3px solid var(--accent);
+}
+
+.scheduler-weather-panel.tone-busy {
+  border-left-color: var(--warn);
+}
+
+.scheduler-weather-panel.tone-hot {
+  border-left-color: var(--danger);
+}
+
+.scheduler-weather-head,
+.scheduler-weather-action {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scheduler-weather-head .section-title {
+  margin-bottom: 0;
+}
+
+.scheduler-weather-head > span,
+.scheduler-weather-panel p,
+.scheduler-weather-grid span,
+.scheduler-weather-action span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.scheduler-weather-head > span {
+  font-family: var(--mono);
+}
+
+.scheduler-weather-panel p,
+.scheduler-weather-action span {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.scheduler-weather-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.scheduler-weather-grid div {
+  display: grid;
+  gap: 2px;
+}
+
+.scheduler-weather-grid dd {
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scheduler-weather-action {
+  align-items: center;
+}

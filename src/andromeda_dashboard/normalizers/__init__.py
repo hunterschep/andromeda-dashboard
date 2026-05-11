@@ -23,7 +23,8 @@ from .resources import (
     normalize_nodes,
     normalize_partitions,
 )
-from .scheduler import parse_sdiag, parse_sprio_weights
+from .scheduler import parse_sdiag, parse_sprio_jobs, parse_sprio_weights
+from ..storage import parse_storage_quota
 
 __all__ = [
     "as_list",
@@ -45,7 +46,9 @@ __all__ = [
     "parse_sacctmgr_assoc",
     "parse_sacctmgr_qos",
     "parse_sdiag",
+    "parse_sprio_jobs",
     "parse_sprio_weights",
+    "parse_storage_quota",
     "parse_tres",
     "pick",
     "split_csvish",

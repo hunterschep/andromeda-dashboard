@@ -12,7 +12,9 @@
       "start_time": "2026-05-05T01:20:00+00:00",
       "end_time": "2026-05-05T02:20:00+00:00",
       "req_tres": "cpu=4,mem=16G",
-      "alloc_tres": "cpu=4,mem=16G"
+      "alloc_tres": "cpu=4,mem=16G",
+      "max_rss": "3G",
+      "total_cpu": "02:00:00"
     },
     {
       "job_id": "91",
@@ -27,6 +29,10 @@
       "end_time": "2026-05-05T03:40:00+00:00",
       "req_tres": "cpu=8,gres/gpu=1,mem=64G",
       "alloc_tres": "cpu=8,gres/gpu=1,mem=64G",
+      "max_rss": "7G",
+      "total_cpu": "00:08:00",
+      "tres_usage_in_ave": "gres/gpuutil=6,gres/gpumem=1024M",
+      "tres_usage_in_max": "gres/gpuutil=11,gres/gpumem=2048M",
       "submit_line": "sbatch secret.sh --token hidden"
     }
   ]

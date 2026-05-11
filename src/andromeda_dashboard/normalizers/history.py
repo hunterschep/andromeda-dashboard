@@ -9,6 +9,7 @@ from .common import (
     parse_datetime,
     parse_duration_seconds,
     parse_exit_code,
+    parse_memory_mb,
     parse_tres,
     pick,
 )
@@ -57,11 +58,33 @@ def normalize_history(raw: dict[str, Any], *, days: int, debug: bool = False) ->
                 end_time=end_time,
                 wait_seconds=wait_seconds,
                 runtime_seconds=runtime_seconds,
+                max_rss_mb=parse_memory_mb(pick(item, "max_rss", "MaxRSS", "maxrss", default=None)),
+                total_cpu_seconds=parse_duration_seconds(
+                    pick(item, "total_cpu", "TotalCPU", "totalcpu", default=None)
+                ),
                 requested_tres=parse_tres(
                     pick(item, "tres_req_str", "req_tres", "ReqTRES", default=None)
                 ),
                 allocated_tres=parse_tres(
                     pick(item, "alloc_tres", "tres_alloc_str", "AllocTRES", default=None)
+                ),
+                tres_usage_in_ave=parse_tres(
+                    pick(
+                        item,
+                        "tres_usage_in_ave",
+                        "TRESUsageInAve",
+                        "tresusageinave",
+                        default=None,
+                    )
+                ),
+                tres_usage_in_max=parse_tres(
+                    pick(
+                        item,
+                        "tres_usage_in_max",
+                        "TRESUsageInMax",
+                        "tresusageinmax",
+                        default=None,
+                    )
                 ),
             )
         )

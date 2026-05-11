@@ -2,10 +2,12 @@
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: 12px;
+  min-width: 0;
   margin-bottom: 12px;
 }
 
 .tool-panel {
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-muted);
@@ -14,6 +16,78 @@
 
 .tool-panel .section-title {
   margin-bottom: 10px;
+}
+
+.storage-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.storage-head .section-title {
+  margin-bottom: 0;
+}
+
+.storage-list {
+  display: grid;
+  gap: 8px;
+}
+
+.storage-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.storage-row.severity-warning {
+  border-left-color: var(--warn);
+}
+
+.storage-row.severity-critical {
+  border-left-color: var(--danger);
+}
+
+.storage-row > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.storage-row span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.storage-meter {
+  height: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #11130f;
+}
+
+.storage-meter i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.severity-warning .storage-meter i {
+  background: var(--warn);
+}
+
+.severity-critical .storage-meter i {
+  background: var(--danger);
+}
+
+.storage-row dl {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
 }
 
 .compact-dl {
@@ -92,6 +166,18 @@ code {
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 7px;
+}
+
+@media (max-width: 520px) {
+  .compact-dl,
+  .kv-list {
+    grid-template-columns: 1fr;
+  }
+
+  code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
 }
 
 .copy-button {

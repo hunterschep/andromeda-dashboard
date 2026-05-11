@@ -1,0 +1,89 @@
+.failure-pattern-panel {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.failure-pattern-head,
+.failure-pattern-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.failure-pattern-head .section-title {
+  margin-bottom: 0;
+}
+
+.failure-pattern-head > span,
+.failure-pattern-title span,
+.failure-pattern-row p,
+.failure-pattern-row > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.failure-pattern-head > span {
+  font-family: var(--mono);
+}
+
+.failure-pattern-list {
+  display: grid;
+  gap: 8px;
+}
+
+.failure-pattern-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.failure-pattern-row.tone-warning {
+  border-left-color: var(--warn);
+}
+
+.failure-pattern-row.tone-critical {
+  border-left-color: var(--danger);
+}
+
+.failure-pattern-title > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.failure-pattern-title strong,
+.failure-pattern-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.failure-pattern-row dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.failure-pattern-row dd {
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.failure-pattern-row p,
+.failure-pattern-row > span {
+  margin: 0;
+  line-height: 1.45;
+}

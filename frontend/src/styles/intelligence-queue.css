@@ -1,0 +1,167 @@
+.queue-forecast-panel {
+  padding: 12px;
+  margin-bottom: 12px;
+  background: var(--surface-muted);
+}
+
+.queue-forecast-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.queue-forecast-head .section-title {
+  margin-bottom: 0;
+}
+
+.queue-forecast-head div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.forecast-bands {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(74px, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.forecast-band {
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.forecast-band span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.forecast-band strong {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 20px;
+}
+
+.forecast-earliest {
+  margin-bottom: 10px;
+}
+
+.priority-lens {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.priority-lens > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.priority-lens span,
+.priority-item p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.priority-list {
+  display: grid;
+  gap: 6px;
+}
+
+.priority-item {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.priority-item > div:first-child {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.priority-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.priority-item em {
+  color: var(--accent-strong);
+  font-family: var(--mono);
+  font-style: normal;
+}
+
+.priority-meter {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #11130f;
+}
+
+.priority-meter i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.tone-busy .priority-meter i {
+  background: var(--warn);
+}
+
+.tone-hot .priority-meter i {
+  background: var(--danger);
+}
+
+.priority-item p {
+  margin: 0;
+}
+
+.queue-explanation {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface);
+}
+
+.queue-explanation-title {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.queue-explanation-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-explanation-title em {
+  color: var(--accent-strong);
+  font-family: var(--mono);
+  font-style: normal;
+}
+
+.queue-explanation dl {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.queue-explanation dd {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

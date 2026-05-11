@@ -1,6 +1,9 @@
 .table-wrap {
   width: 100%;
-  overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
+  contain: layout paint;
+  overflow: auto hidden;
 }
 
 .node-table-block {

@@ -1,0 +1,90 @@
+.contention-panel {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.contention-head,
+.contention-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.contention-head .section-title {
+  margin-bottom: 0;
+}
+
+.contention-head > span,
+.contention-title span,
+.contention-title em,
+.contention-row p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.contention-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.contention-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.contention-row.severity-warning {
+  border-left-color: var(--warn);
+}
+
+.contention-row.severity-critical {
+  border-left-color: var(--danger);
+}
+
+.contention-meter {
+  height: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #11130f;
+}
+
+.contention-meter i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.severity-warning .contention-meter i {
+  background: var(--warn);
+}
+
+.severity-critical .contention-meter i {
+  background: var(--danger);
+}
+
+.contention-row dl {
+  grid-template-columns: 76px minmax(0, 1fr) minmax(0, 1fr);
+  margin: 0;
+}
+
+.contention-row dd {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contention-row p {
+  margin: 0;
+  line-height: 1.45;
+}

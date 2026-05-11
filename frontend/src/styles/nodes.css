@@ -224,3 +224,72 @@
   font-style: normal;
   font-family: var(--mono);
 }
+
+.incident-panel {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.incident-head,
+.incident-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.incident-head > span,
+.incident-title span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.incident-list {
+  display: grid;
+  gap: 8px;
+}
+
+.incident-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.incident-row.severity-warning {
+  border-left-color: var(--warn);
+}
+
+.incident-row.severity-critical {
+  border-left-color: var(--danger);
+}
+
+.incident-title strong,
+.incident-title span {
+  display: block;
+}
+
+.incident-title em {
+  color: var(--text);
+  font-family: var(--mono);
+  font-style: normal;
+}
+
+.incident-row dl {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.incident-row dd {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

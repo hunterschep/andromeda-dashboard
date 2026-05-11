@@ -1,0 +1,126 @@
+.cuda-panel {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.cuda-head,
+.cuda-title {
+  display: flex;
+  align-items: center;
+}
+
+.cuda-head {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cuda-head .section-title {
+  margin-bottom: 0;
+}
+
+.cuda-head > span,
+.cuda-panel > p,
+.cuda-title span,
+.cuda-row p,
+.cuda-row em,
+.cuda-bars span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cuda-panel > p,
+.cuda-row p,
+.cuda-row em {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.cuda-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.cuda-list {
+  display: grid;
+  gap: 8px;
+}
+
+.cuda-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.cuda-row.tone-starved {
+  border-left-color: var(--warn);
+}
+
+.cuda-row.tone-memory {
+  border-left-color: var(--danger);
+}
+
+.cuda-title {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cuda-title > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.cuda-title strong,
+.cuda-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cuda-bars {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cuda-bars div {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 6px;
+}
+
+.cuda-bars i {
+  height: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: #11130f;
+}
+
+.cuda-bars b {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.cuda-bars strong {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: right;
+}
+
+.cuda-row em {
+  font-style: normal;
+}

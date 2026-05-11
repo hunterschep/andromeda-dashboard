@@ -1,0 +1,98 @@
+.commitment-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.commitment-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.commitment-head .section-title {
+  margin-bottom: 0;
+}
+
+.commitment-head > span,
+.commitment-panel > p,
+.commitment-lane span,
+.commitment-lane em {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.commitment-panel > p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.commitment-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.commitment-summary dd {
+  color: var(--text);
+  font-family: var(--mono);
+}
+
+.commitment-lanes {
+  display: grid;
+  gap: 7px;
+}
+
+.commitment-lane {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.8fr) minmax(90px, 1fr) minmax(110px, 0.9fr);
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.commitment-lane > div:first-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.commitment-lane span,
+.commitment-lane em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commitment-lane em {
+  font-family: var(--mono);
+  font-style: normal;
+  text-align: right;
+}
+
+.commitment-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #11130f;
+}
+
+.commitment-track span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.tone-busy .commitment-track span {
+  background: var(--warn);
+}
+
+.tone-hot .commitment-track span {
+  background: var(--danger);
+}

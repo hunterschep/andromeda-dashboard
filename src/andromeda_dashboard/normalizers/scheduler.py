@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ..models import SchedulerHealth
+from ..models import PriorityJob, SchedulerHealth
 from .common import parse_float, parse_int
 
 
@@ -36,6 +36,64 @@ def parse_sprio_weights(text: str) -> dict[str, float]:
             names = names[-len(numbers) :]
         return {name: number for name, number in zip(names, numbers, strict=False)}
     return {}
+
+
+def parse_sprio_jobs(text: str) -> list[PriorityJob]:
+    jobs: list[PriorityJob] = []
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("-") or "Weights" in line or line.upper().startswith("JOBID"):
+            continue
+        parts = _sprio_parts(line)
+        if not parts:
+            continue
+        job_id, values = parts
+        factors = {
+            "age": values[1],
+            "fairshare": values[2],
+            "job_size": values[3],
+            "partition": values[4],
+            "qos": values[5],
+            "tres": values[6],
+        }
+        jobs.append(
+            PriorityJob(
+                job_id=job_id,
+                priority=values[0],
+                age=factors["age"],
+                fairshare=factors["fairshare"],
+                job_size=factors["job_size"],
+                partition=factors["partition"],
+                qos=factors["qos"],
+                tres=factors["tres"],
+                dominant_factor=_dominant_factor(factors),
+            )
+        )
+    return jobs
+
+
+def _sprio_parts(line: str) -> tuple[str, list[float]] | None:
+    if "|" in line:
+        columns = [part.strip() for part in line.split("|")]
+        if len(columns) < 8 or not columns[0]:
+            return None
+        return columns[0], [_number(part) for part in columns[1:8]]
+    columns = line.split()
+    if len(columns) >= 8 and parse_float(columns[1]) is not None:
+        return columns[0], [_number(part) for part in columns[1:8]]
+    if len(columns) >= 11 and parse_float(columns[3]) is not None:
+        selected = [columns[index] for index in (3, 5, 6, 7, 8, 9, 10)]
+        return columns[0], [_number(part) for part in selected]
+    return None
+
+
+def _number(value: str) -> float:
+    return parse_float(value) or 0
+
+
+def _dominant_factor(factors: dict[str, float]) -> str | None:
+    factor, value = max(factors.items(), key=lambda item: (item[1], item[0]))
+    return factor if value > 0 else None
 
 
 def _sdiag_microseconds_to_seconds(value: str | None) -> float | None:
