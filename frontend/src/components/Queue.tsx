@@ -1,6 +1,5 @@
-import { Gauge, MessageSquareText, Users } from "lucide-react";
+import { Gauge, Users } from "lucide-react";
 import { formatMemory, formatNumber, shortTime } from "../api";
-import { decodePendingReasons } from "../lib/reasonDecoder";
 import type { QueueJob } from "../types";
 import { EmptyState, SectionTitle } from "./common";
 
@@ -67,7 +66,7 @@ export function QueuePressurePanel({ summary }: { summary: QueuePressure }) {
   return (
     <div className="intel-panel">
       <div className="intel-heading">
-        <SectionTitle icon={<Gauge size={18} />} title="Queue Pressure" />
+        <SectionTitle icon={<Gauge size={18} />} title="Queue Totals" />
       </div>
       <dl className="compact-dl four-up">
         <div>
@@ -92,43 +91,6 @@ export function QueuePressurePanel({ summary }: { summary: QueuePressure }) {
         <MiniRank title="Partitions" rows={summary.partitions} empty="none" />
         <MiniRank title="GPU asks" rows={summary.gpus} empty="none" />
       </div>
-    </div>
-  );
-}
-
-export function ReasonDecoderPanel({ jobs }: { jobs: QueueJob[] }) {
-  const reasons = decodePendingReasons(jobs);
-  return (
-    <div className="reason-decoder">
-      <div className="intel-heading">
-        <SectionTitle icon={<MessageSquareText size={18} />} title="Reason Decoder" />
-      </div>
-      {reasons.length ? (
-        <div className="reason-list">
-          {reasons.slice(0, 4).map((item) => (
-            <article className={`reason-row severity-${item.severity}`} key={item.reason}>
-              <div>
-                <strong>{item.title}</strong>
-                <span>{item.count} job{item.count === 1 ? "" : "s"}</span>
-              </div>
-              <dl>
-                <div>
-                  <dt>reason</dt>
-                  <dd>{item.reason}</dd>
-                </div>
-                <div>
-                  <dt>demand</dt>
-                  <dd>{item.demand}</dd>
-                </div>
-              </dl>
-              <p>{item.explanation}</p>
-              <em>{item.action}</em>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <EmptyState text="No pending reasons to decode in the current filters." />
-      )}
     </div>
   );
 }

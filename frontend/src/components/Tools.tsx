@@ -1,28 +1,8 @@
 import { Clipboard, Copy, Database, Gauge, HardDrive } from "lucide-react";
 import { formatNumber, shortTime } from "../api";
 import { secondsText, tresText, type ToolCommand } from "../lib/dashboard";
-import type { AccountLimits, CacheMeta, Insight, SchedulerHealth, StorageResponse } from "../types";
+import type { AccountLimits, CacheMeta, SchedulerHealth, StorageResponse } from "../types";
 import { EmptyState, SectionTitle } from "./common";
-
-export function InsightsList({ insights }: { insights: Insight[] }) {
-  if (!insights.length) return <EmptyState text="No insights available yet." />;
-  return (
-    <div className="insight-list">
-      {insights.map((insight) => (
-        <article className={`insight ${insight.severity}`} key={insight.id}>
-          <div>
-            <strong>{insight.title}</strong>
-            <span>{insight.confidence} confidence</span>
-          </div>
-          <p>{insight.message}</p>
-          {insight.details.length ? (
-            <div className="detail-line">{insight.details.join(" | ")}</div>
-          ) : null}
-        </article>
-      ))}
-    </div>
-  );
-}
 
 export function SchedulerPanel({ scheduler }: { scheduler: SchedulerHealth | null }) {
   if (!scheduler) return <EmptyState text="Scheduler health is not available." />;
@@ -103,7 +83,7 @@ export function StoragePanel({
   return (
     <div className="tool-panel storage-panel">
       <div className="storage-head">
-        <SectionTitle icon={<HardDrive size={18} />} title="Storage Pressure" />
+        <SectionTitle icon={<HardDrive size={18} />} title="Storage Quotas" />
         <button
           type="button"
           className="copy-button"

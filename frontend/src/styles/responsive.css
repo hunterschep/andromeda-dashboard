@@ -12,70 +12,11 @@
   }
 
   .two-column,
-  .insight-list,
   .tools-grid,
   .command-list,
   .node-summary,
   .queue-intel,
-  .operations-deck,
-  .pulse-panel,
-  .scarcity-row,
-  .partition-pressure-row,
-  .planner-controls,
-  .jupyter-launcher,
-  .sweep-launcher,
-  .planner-results,
-  .run-shape-row dl {
-    grid-template-columns: 1fr;
-  }
-
   .intel-columns,
-  .signal-grid,
-  .forecast-bands,
-  .queue-explanation dl,
-  .backfill-row dl,
-  .walltime-row dl,
-  .failure-summary,
-  .failure-item dl,
-  .failure-pattern-row dl,
-  .incident-row dl,
-  .reason-row dl,
-  .gpu-hunt-row dl,
-  .history-intel-summary,
-  .submit-strategy dl,
-  .wait-band-grid,
-  .contention-row dl,
-  .efficiency-summary,
-  .io-radar-summary,
-  .io-radar-row dl,
-  .interactive-session-row dl,
-  .support-packet-row dl,
-  .fairshare-impact-summary,
-  .experiment-head dl,
-  .experiment-row dl,
-  .runway-row dl,
-  .priority-factor-bars,
-  .telemetry-summary,
-  .replay-delta-grid,
-  .pressure-calendar-summary,
-  .submit-window-grid,
-  .prediction-summary,
-  .scheduler-weather-grid,
-  .freshness-source,
-  .ops-brief-lines,
-  .node-class-row dl,
-  .partition-fit-row dl,
-  .capacity-loss-row,
-  .dependency-radar-row dl,
-  .queue-motion-row dl,
-  .queue-shape-summary,
-  .queue-shape-row dl,
-  .gpu-fragmentation-row dl,
-  .gpu-flow-row dl,
-  .wait-doctor-row dl {
-    grid-template-columns: 1fr;
-  }
-
   .storage-row dl {
     grid-template-columns: 1fr;
   }
@@ -83,11 +24,6 @@
   .matrix-row,
   .runtime-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .fleet-map,
-  .fleet-lane {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -142,7 +78,10 @@
   }
 
   .overview-strip,
-  .filters {
+  .filters,
+  .matrix-row,
+  .runtime-row,
+  .user-workload div {
     grid-template-columns: 1fr;
   }
 
@@ -153,117 +92,5 @@
 
   .metric:last-child {
     border-bottom: 0;
-  }
-
-  .fleet-head {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .incident-head,
-  .incident-title,
-  .capacity-loss-head,
-  .capacity-loss-head > div {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .gpu-topology-head,
-  .gpu-flow-head,
-  .gpu-flow-title,
-  .gpu-flow-title > div,
-  .gpu-fragmentation-head,
-  .gpu-fragmentation-title,
-  .queue-shape-head,
-  .queue-shape-title,
-  .request-surgery-head,
-  .request-surgery-title,
-  .wait-doctor-head,
-  .wait-doctor-title,
-  .backfill-head,
-  .backfill-title,
-  .walltime-head,
-  .walltime-title,
-  .gpu-hunt-head,
-  .priority-factors-head,
-  .priority-factor-title,
-  .queue-forecast-head {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .gpu-topology-summary,
-  .queue-forecast-head div {
-    justify-content: flex-start;
-  }
-
-  .partition-fit-head,
-  .partition-fit-title {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .matrix-row,
-  .runtime-row,
-  .user-workload div,
-  .gpu-node-tile dl,
-  .queue-explanation-title,
-  .failure-title {
-    grid-template-columns: 1fr;
-  }
-
-  .activity-row {
-    grid-template-columns: 1fr;
-  }
-
-  .gpu-flow-lane {
-    grid-template-columns: 1fr;
-  }
-
-  .planner-head {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .sweep-governor-head {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .env-preflight-head {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .runway-head,
-  .runway-title,
-  .interactive-sentinel-head,
-  .interactive-session-title,
-  .interactive-session-actions,
-  .support-packet-head,
-  .support-packet-title,
-  .failure-pattern-head,
-  .failure-pattern-title,
-  .run-shape-head,
-  .run-shape-title,
-  .fairshare-impact-head,
-  .fairshare-impact-rows article,
-  .fairshare-impact-actions,
-  .pressure-anomaly-head,
-  .submit-window-head,
-  .submit-window-head > div,
-  .pressure-anomaly-row > div:first-child,
-  .scheduler-weather-head,
-  .data-freshness-head,
-  .data-freshness-head > div,
-  .ops-brief-head,
-  .ops-brief-head > div,
-  .data-staging-head,
-  .data-staging-head > div,
-  .checkpoint-budget-head,
-  .checkpoint-budget-head > div,
-  .scheduler-weather-action {
-    align-items: stretch;
-    flex-direction: column;
   }
 }

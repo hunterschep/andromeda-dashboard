@@ -67,15 +67,6 @@ main {
   padding: 22px 28px 36px;
 }
 
-.section-loading {
-  min-height: 120px;
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 12px;
-}
-
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -239,15 +230,7 @@ h1 {
   padding: 16px;
 }
 
-.executive-ui main section.panel > p,
-.executive-ui main article > p,
-.executive-ui main [class$="-panel"] > p,
-.executive-ui main [class$="-row"] > p,
-.executive-ui main [class$="-item"] > p {
-  display: none;
-}
-
-.executive-ui .empty-state {
+.empty-state {
   padding: 10px;
   border: 1px dashed var(--border);
   border-radius: 7px;
@@ -274,12 +257,4 @@ h1 {
 .section-row {
   justify-content: space-between;
   gap: 14px;
-}
-
-.section-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
 }
