@@ -98,17 +98,49 @@ def _queue_job(
         state_description=pick(item, "state_description", "state_desc", default=None),
         reason_label=PENDING_REASON_LABELS.get(str(state_reason or "")),
         constraints=_constraint_list(
-            pick(item, "features", "features_used", "batch_features", "constraints", "constraint", default=None),
+            pick(
+                item,
+                "features",
+                "features_used",
+                "batch_features",
+                "constraints",
+                "constraint",
+                default=None,
+            ),
             pick(item, "prefer", "preferred_features", default=None),
         ),
         required_nodes=_nodes_from_value(
-            pick(item, "required_nodes", "required_node_list", "req_node_list", "req_nodes", default=None)
+            pick(
+                item,
+                "required_nodes",
+                "required_node_list",
+                "req_node_list",
+                "req_nodes",
+                default=None,
+            )
         ),
         excluded_nodes=_nodes_from_value(
-            pick(item, "excluded_nodes", "excluded_node_list", "exc_node_list", "exc_nodes", default=None)
+            pick(
+                item,
+                "excluded_nodes",
+                "excluded_node_list",
+                "exc_node_list",
+                "exc_nodes",
+                default=None,
+            )
         ),
-        reservation=_scalar_text(pick(item, "reservation", "reservation_name", "resv_name", default=None)),
-        licenses=_list_from_value(pick(item, "licenses", "licenses_requested", "licenses_allocated", default=None)),
+        reservation=_scalar_text(
+            pick(item, "reservation", "reservation_name", "resv_name", default=None)
+        ),
+        licenses=_list_from_value(
+            pick(
+                item,
+                "licenses",
+                "licenses_requested",
+                "licenses_allocated",
+                default=None,
+            )
+        ),
         cpus=parse_int(pick(item, "cpus", "num_cpus", "min_cpus", default=0)),
         memory_mb=parse_memory_mb(
             pick(

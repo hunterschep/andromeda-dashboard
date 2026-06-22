@@ -42,7 +42,12 @@ def parse_sprio_jobs(text: str) -> list[PriorityJob]:
     jobs: list[PriorityJob] = []
     for raw_line in text.splitlines():
         line = raw_line.strip()
-        if not line or line.startswith("-") or "Weights" in line or line.upper().startswith("JOBID"):
+        if (
+            not line
+            or line.startswith("-")
+            or "Weights" in line
+            or line.upper().startswith("JOBID")
+        ):
             continue
         parts = _sprio_parts(line)
         if not parts:

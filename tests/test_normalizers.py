@@ -147,21 +147,41 @@ def test_history_and_text_parsers(load_json, load_text):
 
 
 def test_storage_parser_ignores_acct_chk_identity_noise():
-    raw = """
-Pinky output:
-Login  name:  scheppat  In  real  life:  Hunter  M  Scheppat  Directory:  /home/scheppat  Shell:  /bin/bash
-uid=11255(scheppat)  gid=11255(scheppat)  groups=11255(scheppat),1529(prudlab)
-drwx------  1  scheppat  scheppat  0  May  6  16:58  /home/scheppat
-
-User level disk usage
-OWNER     PATH               USED     SOFT_LIMIT  HARD_LIMIT  USAGE_%  GRACE_PERIOD  TIME_OVER_SOFT_LIMIT  STATUS
-scheppat  /home/scheppat     31.25GB  45.00GB     50.00GB     69       14d_0:00:00h  0.00s                 ACTIVE
-scheppat  /scratch/scheppat  1.15TB   1TB         25TB        115      7d_0:00:00h   6:58:12h              ACTIVE
-
-Group level disk usage for the specified group(s)
-GROUP    POSIX       OWNER     PATH               USED    SOFT_LIMIT  HARD_LIMIT  USAGE_%  GRACE_PERIOD  TIME_OVER_SOFT_LIMIT  STATUS
-prudlab  drwxrws---  prudhome  /projects/prudlab  3.89TB  10TB        25TB        38       14d_0:00:00h  0.00s                 ACTIVE
-"""
+    raw = "\n".join(
+        [
+            "Pinky output:",
+            (
+                "Login  name:  scheppat  In  real  life:  Hunter  M  Scheppat  "
+                "Directory:  /home/scheppat  Shell:  /bin/bash"
+            ),
+            "uid=11255(scheppat)  gid=11255(scheppat)  groups=11255(scheppat),1529(prudlab)",
+            "drwx------  1  scheppat  scheppat  0  May  6  16:58  /home/scheppat",
+            "",
+            "User level disk usage",
+            (
+                "OWNER     PATH               USED     SOFT_LIMIT  HARD_LIMIT  USAGE_%  "
+                "GRACE_PERIOD  TIME_OVER_SOFT_LIMIT  STATUS"
+            ),
+            (
+                "scheppat  /home/scheppat     31.25GB  45.00GB     50.00GB     69       "
+                "14d_0:00:00h  0.00s                 ACTIVE"
+            ),
+            (
+                "scheppat  /scratch/scheppat  1.15TB   1TB         25TB        115      "
+                "7d_0:00:00h   6:58:12h              ACTIVE"
+            ),
+            "",
+            "Group level disk usage for the specified group(s)",
+            (
+                "GROUP    POSIX       OWNER     PATH               USED    SOFT_LIMIT  "
+                "HARD_LIMIT  USAGE_%  GRACE_PERIOD  TIME_OVER_SOFT_LIMIT  STATUS"
+            ),
+            (
+                "prudlab  drwxrws---  prudhome  /projects/prudlab  3.89TB  10TB        "
+                "25TB        38       14d_0:00:00h  0.00s                 ACTIVE"
+            ),
+        ]
+    )
     storage = parse_storage_quota(raw)
 
     assert [volume.name for volume in storage.volumes] == ["home", "scratch", "projects"]

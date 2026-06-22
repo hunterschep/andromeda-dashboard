@@ -52,7 +52,8 @@ class TelemetryStore:
                 """
             )
             connection.execute(
-                "CREATE INDEX IF NOT EXISTS idx_telemetry_scope_time ON telemetry_samples(scope, captured_at)"
+                "CREATE INDEX IF NOT EXISTS idx_telemetry_scope_time "
+                "ON telemetry_samples(scope, captured_at)"
             )
             connection.commit()
 
@@ -148,15 +149,8 @@ def quietest_hour(samples: list[TelemetrySample]) -> int | None:
 def predict_queue(*, scope: str, hours: int, samples: list[TelemetrySample]) -> dict:
     if not samples:
         return prediction_payload(
-            scope,
-            hours,
-            "low",
-            "unknown",
-            None,
-            {"lower": None, "upper": None},
-            ["no telemetry samples in selected window"],
-            "unknown",
-            0,
+            scope, hours, "low", "unknown", None, {"lower": None, "upper": None},
+            ["no telemetry samples in selected window"], "unknown", 0,
             "Collect telemetry before estimating queue movement.",
         )
     latest = samples[-1]
@@ -260,11 +254,17 @@ def prediction_recommendation(
     if latest.pending == 0:
         return "Visible queue is clear; short jobs may backfill quickly."
     if clear_minutes is not None:
-        return f"Observed pending drain suggests roughly {clear_minutes} minute(s) to clear this visible queue."
+        return (
+            f"Observed pending drain suggests roughly {clear_minutes} minute(s) "
+            "to clear this visible queue."
+        )
     if trend == "rising":
         return "Queue is growing; reduce walltime or resource width to improve placement odds."
     if latest.gpu_total and latest.gpu_free == 0:
-        return "GPU supply is fully allocated; consider a compatible GPU class or CPU-only fallback."
+        return (
+            "GPU supply is fully allocated; consider a compatible GPU class "
+            "or CPU-only fallback."
+        )
     return "Not enough movement yet; keep watching telemetry or rely on Slurm start estimates."
 
 

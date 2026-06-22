@@ -1,3 +1,4 @@
+from ..storage import parse_storage_quota
 from .accounting import parse_sacctmgr_assoc, parse_sacctmgr_qos
 from .common import (
     as_list,
@@ -24,7 +25,6 @@ from .resources import (
     normalize_partitions,
 )
 from .scheduler import parse_sdiag, parse_sprio_jobs, parse_sprio_weights
-from ..storage import parse_storage_quota
 
 __all__ = [
     "as_list",

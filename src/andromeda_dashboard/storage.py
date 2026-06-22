@@ -79,7 +79,9 @@ def is_storage_noise(text: str) -> bool:
     lowered = text.lower()
     if "quota" in lowered and "used" in lowered:
         return True
-    return lowered.endswith(":") or lowered.startswith(("pinky output", "login name", "uid=", "user account"))
+    return lowered.endswith(":") or lowered.startswith(
+        ("pinky output", "login name", "uid=", "user account")
+    )
 
 
 def storage_volume(
@@ -98,7 +100,10 @@ def storage_volume(
     files_quota = parse_count(files_quota_raw) if files_quota_raw else None
     percent = parse_count(percent_raw) if percent_raw else percent_used(used, quota)
     file_percent = percent_used(files_used, files_quota)
-    risk_percent = max((value for value in [percent, file_percent] if value is not None), default=None)
+    risk_percent = max(
+        (value for value in [percent, file_percent] if value is not None),
+        default=None,
+    )
     return StorageVolume(
         name=name_from_path(path),
         path=path,
