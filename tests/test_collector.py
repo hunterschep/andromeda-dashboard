@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 
 from andromeda_dashboard.cache import SQLiteCache
 from andromeda_dashboard.collector import (
@@ -21,6 +22,8 @@ from andromeda_dashboard.collector import (
     SlurmCollector,
 )
 from andromeda_dashboard.config import Settings
+from andromeda_dashboard.models import CacheMeta
+from andromeda_dashboard.snapshot import dedupe_cache
 from andromeda_dashboard.ssh import SSHAuthError, SSHCommandError, SSHTimeoutError
 
 
@@ -199,6 +202,47 @@ def test_snapshot_records_telemetry(load_json, load_text, tmp_path):
     assert prediction["wait_band"] in {"unknown", "now/backfill", "GPU blocked"}
     assert set(prediction["wait_range_minutes"]) == {"lower", "upper"}
     assert prediction["confidence_reasons"]
+
+
+def test_snapshot_reuses_raw_queue_payloads(load_json, load_text, tmp_path):
+    settings = make_settings(tmp_path)
+    runner = FakeRunner(outputs(load_json, load_text))
+    collector = SlurmCollector(
+        settings,
+        runner=runner,
+        cache=SQLiteCache(settings.cache_path),
+    )
+
+    snapshot = collector.get_snapshot(scope="mine", days=7)
+
+    assert [job.job_id for job in snapshot.my_jobs.jobs] == ["101"]
+    assert snapshot.queue.scope == "mine"
+    assert runner.calls.count(QUEUE.command) == 1
+    assert runner.calls.count(STARTS.command) == 1
+    assert SPRIO_JOBS.command not in runner.calls
+
+
+def test_dedupe_cache_prefers_fresh_metadata():
+    older = datetime.now(UTC) - timedelta(minutes=5)
+    newer = datetime.now(UTC)
+    stale = CacheMeta(
+        key="queue",
+        captured_at=newer,
+        ttl_seconds=30,
+        is_stale=True,
+        errors=["timeout"],
+    )
+    fresh = CacheMeta(
+        key="queue",
+        captured_at=older,
+        ttl_seconds=30,
+        is_stale=False,
+        errors=[],
+    )
+
+    deduped = dedupe_cache([fresh, stale])
+
+    assert deduped == [fresh]
 
 
 def test_collector_storage_quota(load_json, load_text, tmp_path):

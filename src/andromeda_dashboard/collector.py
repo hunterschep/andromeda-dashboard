@@ -32,21 +32,27 @@ from .models import (
     ResourceResponse,
 )
 from .normalizers import (
-    normalize_cluster_summary,
-    normalize_gpu_pools,
-    normalize_history,
     normalize_nodes,
     normalize_partitions,
-    normalize_queue,
     parse_sacctmgr_assoc,
     parse_sacctmgr_qos,
     parse_sdiag,
     parse_sprio_jobs,
     parse_sprio_weights,
 )
+from .snapshot import build_snapshot
 from .ssh import ReadOnlySSHRunner, SSHCommandError
 from .storage import parse_storage_quota
 from .telemetry import TelemetryStore
+from .views import (
+    config_status_for_user,
+    current_user_from_identity,
+    history_days,
+    history_spec,
+    normalize_history_response,
+    normalize_queue_response,
+    normalize_resources_response,
+)
 
 
 class SlurmCollector:
@@ -61,6 +67,7 @@ class SlurmCollector:
         self.runner = runner or ReadOnlySSHRunner(settings.ssh)
         self.cache = cache or SQLiteCache(settings.cache_path)
         self.telemetry = TelemetryStore(settings.cache_path)
+        self._current_user_cache: str | None = None
 
     def _result_from_cache_error(
         self, spec: CommandSpec, cached: CachedPayload | None, error: Exception
@@ -100,41 +107,27 @@ class SlurmCollector:
             return self._result_from_cache_error(spec, stale, exc)
 
     def config_status(self) -> ConfigStatus:
-        return ConfigStatus(
-            config_path=str(self.settings.config_path),
-            config_exists=self.settings.config_path.exists(),
-            ssh_alias=self.settings.ssh.alias,
-            current_user=self.current_user(),
-            host=self.settings.server.host,
-            port=self.settings.server.port,
-            default_scope=self.settings.privacy.default_scope,
-            lab_users=len(self.settings.lab.users),
-            cache_path=str(self.settings.cache_path),
-            debug=self.settings.privacy.debug,
-        )
+        return config_status_for_user(self.settings, self.current_user())
 
     def current_user(self) -> str:
+        if self._current_user_cache is not None:
+            return self._current_user_cache
         if self.settings.slurm.user:
-            return self.settings.slurm.user
-        identity = self._run(IDENTITY)
-        remote_user = str(identity.payload or "").strip().splitlines()[0:1]
-        return remote_user[0] if remote_user and remote_user[0] else self.settings.current_user
+            self._current_user_cache = self.settings.slurm.user
+            return self._current_user_cache
+        self._current_user_cache = current_user_from_identity(self.settings, self._run(IDENTITY))
+        return self._current_user_cache
 
     def get_resources(self, cluster_queue: QueueResponse | None = None) -> ResourceResponse:
         nodes_raw = self._run(NODES)
         partitions_raw = self._run(PARTITIONS)
         sinfo_raw = self._run(SINFO)
-        nodes = normalize_nodes(nodes_raw.payload if isinstance(nodes_raw.payload, dict) else {})
-        partitions = normalize_partitions(
-            partitions_raw.payload if isinstance(partitions_raw.payload, dict) else {}, nodes
-        )
         queue = cluster_queue or self.get_queue(scope="cluster")
-        return ResourceResponse(
-            nodes=nodes,
-            gpu_pools=normalize_gpu_pools(nodes),
-            partitions=partitions,
-            cluster=normalize_cluster_summary(nodes, queue),
-            cache=[nodes_raw.meta, partitions_raw.meta, sinfo_raw.meta, *queue.cache],
+        return normalize_resources_response(
+            nodes_raw,
+            partitions_raw,
+            sinfo_raw,
+            cluster_queue=queue,
         )
 
     def get_partitions(self) -> list:
@@ -148,34 +141,19 @@ class SlurmCollector:
     def get_queue(self, scope: Literal["mine", "lab", "cluster"] = "mine") -> QueueResponse:
         queue_raw = self._run(QUEUE)
         starts_raw = self._run(STARTS)
-        response = normalize_queue(
-            queue_raw.payload if isinstance(queue_raw.payload, dict) else {},
-            starts_raw.payload if isinstance(starts_raw.payload, dict) else {},
+        return normalize_queue_response(
+            self.settings,
+            queue_raw,
+            starts_raw,
             scope=scope,
             current_user=self.current_user(),
-            lab_users=self.settings.lab.users,
-            debug=self.settings.privacy.debug,
         )
-        response.cache = [queue_raw.meta, starts_raw.meta]
-        return response
 
     def get_history(self, days: int | None = None) -> HistoryResponse:
-        days = days or self.settings.history.default_days
-        if days not in {7, 30}:
-            days = 7
-        spec = CommandSpec(
-            key=f"history-{days}",
-            command=f"sacct --json -S now-{days}days -n -X",
-            ttl_seconds=900,
-        )
+        days = history_days(self.settings, days)
+        spec = history_spec(days)
         history_raw = self._run(spec)
-        response = normalize_history(
-            history_raw.payload if isinstance(history_raw.payload, dict) else {},
-            days=days,
-            debug=self.settings.privacy.debug,
-        )
-        response.cache = [history_raw.meta]
-        return response
+        return normalize_history_response(self.settings, history_raw, days=days)
 
     def get_account_limits(self) -> AccountLimits:
         account_limits, _cache = self._get_account_limits_with_cache()
@@ -239,33 +217,7 @@ class SlurmCollector:
         scope: Literal["mine", "lab", "cluster"] = "mine",
         days: int | None = None,
     ) -> DashboardSnapshot:
-        config = self.config_status()
-        queue = self.get_queue(scope=scope)
-        my_jobs = queue if scope == "mine" else self.get_queue(scope="mine")
-        cluster_queue = queue if scope == "cluster" else self.get_queue(scope="cluster")
-        resources = self.get_resources(cluster_queue=cluster_queue)
-        history = self.get_history(days=days)
-        insights = self.get_insights(resources=resources, queue=queue, history=history)
-        cache = self._dedupe_cache(
-            [
-                *resources.cache,
-                *queue.cache,
-                *my_jobs.cache,
-                *history.cache,
-                *insights.cache,
-            ]
-        )
-        snapshot = DashboardSnapshot(
-            config=config,
-            resources=resources,
-            queue=queue,
-            my_jobs=my_jobs,
-            history=history,
-            insights=insights,
-            cache=cache,
-        )
-        self.telemetry.record_snapshot(snapshot)
-        return snapshot
+        return build_snapshot(self, scope=scope, days=days)
 
     def get_telemetry(self, scope: Literal["mine", "lab", "cluster"] = "mine", hours: int = 24):
         return self.telemetry.trend(scope=scope, hours=hours)
@@ -278,8 +230,3 @@ class SlurmCollector:
         response = parse_storage_quota(str(storage_raw.payload or ""))
         response.cache = [storage_raw.meta]
         return response
-
-    @staticmethod
-    def _dedupe_cache(cache: list[CacheMeta]) -> list[CacheMeta]:
-        by_key = {meta.key: meta for meta in cache}
-        return [by_key[key] for key in sorted(by_key)]
